@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import Booking, Guide, Restaurant, Customer, Review
+from .models import Booking, Guide, Customer, Review,Hotel
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -8,11 +8,6 @@ class GuideForm(forms.ModelForm):
     class Meta:
         model = Guide
         fields = ['first_name', 'last_name', 'email', 'phone',  'experience_years', ]
-
-class RestaurantForm(forms.ModelForm):
-    class Meta:
-        model = Restaurant
-        fields = ['name', 'destination', 'email', 'phone', 'cuisine_type']
 
 
 class CustomerRegistrationForm(UserCreationForm):

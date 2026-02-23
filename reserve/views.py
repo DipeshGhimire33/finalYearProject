@@ -5,12 +5,13 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-import dotenv
 from .forms import CustomerRegistrationForm
-from .models import UserProfile
+from .models import Hotel, UserProfile
+import requests
+from django.shortcuts import render
 
 load_dotenv()
-GOOGLE_API_KEY = os.getenv('AIzaSyBJod7t2x-K64ayGTIICQDR9R7dCm1ydnI')  # ✅ safe way to load API key from .env file
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')  # ✅ safe way to load API key from .env file
 
 
 def index(request):
@@ -50,58 +51,8 @@ def register(request):
 
     return render(request, 'registration/register.html', {'form': form})
 
-# @csrf_exempt
-# def hotelsAPI(request):
-#     if request.method == "POST":
-#         # Handle POST request to create a new hotel
-#         url = f"enter the url of the api here"
-#         response = requests.post(url, data=request.POST)
-#         if response.status_code == 200:
-#             raw_data = response.json()
-#             # Process raw_data as needed and create Hotel objects
-#             results=raw_data.get()#('results')  # Adjust this based on the actual structure of the API response   )
-#             for result in results:
-#                 data=json.dumps(result)
-#                 # Create all the needed fiels from the data and save to database
-#                 #Example:
-#                 #name=result.get('name')
-#                 # location =result.get('location') and so on for others
-#                 #if it contains sub-fields like firstname & lastname
-#                 #hotel=name_of_the_model_in_which_you_want_to_store.objects.create(
-#                 # name=name.get(firstname) + " " + name.get(lastname),
-#                 # other_field=result.get('other_field'),
-#                 # if it doesn't contain sub-fields like firstname & lastname
-#                 # location=location
-                 
-#                 #)
-                
-#                 #destination=result.get('destination')
-                
-
-                
-    
-#     elif request.method == "GET":
-#         # Handle GET request to list hotels
-#         pass
-#     return render(request, 'hotels_api.html') 
-# api key for testing purposes only, please replace it with your own key
-
-
-#          AIzaSyBJod7t2x-K64ayGTIICQDR9R7dCm1ydnI
-
-           
-############################################################################
-# The following code is for testing purposes only, it is not used in the project
-############################################################################        
-import requests
-from django.shortcuts import render
-from django.contrib import messages
-from .models import Hotel
-
-GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY"  # ✅ paste your key here
 
 def get_photo_url(photo_reference):
-    # ✅ This builds the image URL from the photo reference Google returns
     if photo_reference:
         return (
             f"https://maps.googleapis.com/maps/api/place/photo"
@@ -109,92 +60,123 @@ def get_photo_url(photo_reference):
             f"&photoreference={photo_reference}"
             f"&key={GOOGLE_API_KEY}"
         )
-    return None  # return None if no photo available
+    return None
+
+
+# def hotelsAPI(request):
+    
+    
+#     if request.method == "POST":
+#         city = request.POST.get('city', '').strip()
+#     if request.method == "POST":
+#         city = request.POST.get('city', '').strip()
+        
+#         if not city:
+#             messages.error(request, "Please enter a city name!")
+#             return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
+        
+#         try:
+#             # Step 1: Get city coordinates
+#             geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={city}&key={GOOGLE_API_KEY}"
+#             geo_response = requests.get(geocode_url).json()
+            
+#             if not geo_response.get('results'):
+#                 messages.error(request, f"City '{city}' not found.")
+#                 return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
+            
+#             location = geo_response['results'][0]['geometry']['location']
+#             lat, lng = location['lat'], location['lng']
+            
+#             # Step 2: Search for hotels
+#             places_url = (
+#                 f"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+#                 f"?location={lat},{lng}"
+#                 f"&radius=5000"
+#                 f"&type=lodging"
+#                 f"&key={GOOGLE_API_KEY}"
+#             )
+#             places_response = requests.get(places_url).json()
+#             results = places_response.get('results', [])
+            
+#             if not results:
+#                 messages.warning(request, f"No hotels found in {city}.")
+            
+#             # Step 3: Save hotels to database
+#             for result in results:
+#                 photos = result.get('photos', [])
+#                 photo_ref = photos[0].get('photo_reference') if photos else None
+#                 image_url = get_photo_url(photo_ref)
+                
+#                 name = result.get('name', 'Unknown Hotel')
+#                 address = result.get('vicinity', 'N/A')
+#                 hotel_lat = result['geometry']['location']['lat']
+#                 hotel_lng = result['geometry']['location']['lng']
+                
+#                 Hotel.objects.get_or_create(
+#                     name=name,
+#                     defaults={
+#                         'location': city,
+#                         'address': address,
+#                         'lat': hotel_lat,
+#                         'lng': hotel_lng,
+#                         'image_url': image_url,
+#                     }
+#                 )
+            
+#             messages.success(request, f"Loaded {len(results)} hotels in {city}!")
+            
+#         except Exception as e:
+#             messages.error(request, f"Error: {str(e)}")
+    
+#     hotels = Hotel.objects.all()
+#     return render(request, 'hotels_api.html', {'hotels': hotels})
 
 
 def hotelsAPI(request):
     if request.method == "POST":
-        city = request.POST.get('city', 'London')
-
+        city = request.POST.get('city', '').strip()
+        
+        if not city:
+            messages.error(request, "Please enter a city name!")
+            return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
+        
         try:
-            # ─── Step 1: Get coordinates of the city ───────────────────
-            geocode_url = (
-                f"https://maps.googleapis.com/maps/api/geocode/json"
-                f"?address={city}&key={GOOGLE_API_KEY}"
-            )
+            # Step 1: Get city coordinates
+            geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={city}&key={GOOGLE_API_KEY}"
+            
+            print(f"🔍 Searching for: {city}")
+            print(f"📡 Request URL: {geocode_url}")
+            
             geo_response = requests.get(geocode_url).json()
-
-            if not geo_response['results']:
-                messages.error(request, f"City '{city}' not found.")
+            
+            print(f"📦 Full API Response:")
+            print(geo_response)  # ✅ This will show us EVERYTHING
+            print(f"📊 Status: {geo_response.get('status')}")
+            
+            # Check for API errors
+            if geo_response.get('status') == 'REQUEST_DENIED':
+                error_msg = geo_response.get('error_message', 'API access denied')
+                messages.error(request, f"API Error: {error_msg}")
+                print(f"❌ REQUEST DENIED: {error_msg}")
                 return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
-
+            
+            if not geo_response.get('results'):
+                messages.error(request, f"City '{city}' not found.")
+                print(f"❌ No results for {city}")
+                return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
+            
             location = geo_response['results'][0]['geometry']['location']
             lat, lng = location['lat'], location['lng']
-
-            # ─── Step 2: Search for hotels near the city ───────────────
-            places_url = (
-                f"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-                f"?location={lat},{lng}"
-                f"&radius=5000"
-                f"&type=lodging"
-                f"&key={GOOGLE_API_KEY}"
-            )
-            places_response = requests.get(places_url).json()
-            results = places_response.get('results', [])
-
-            if not results:
-                messages.warning(request, f"No hotels found in {city}.")
-
-            for result in results:
-                # ─── Step 3: Extract photo reference ───────────────────
-                photos         = result.get('photos', [])
-                photo_ref      = photos[0].get('photo_reference') if photos else None
-                image_url      = get_photo_url(photo_ref)  # ✅ build the image URL
-
-                name           = result.get('name', 'Unknown Hotel')
-                address        = result.get('vicinity', 'N/A')
-                rating         = result.get('rating', None)
-                hotel_lat      = result['geometry']['location']['lat']
-                hotel_lng      = result['geometry']['location']['lng']
-
-                # ─── Step 4: Save to database ──────────────────────────
-                Hotel.objects.get_or_create(
-                    name=name,
-                    defaults={
-                        'location' : city,
-                        'address'  : address,
-                        'lat'      : hotel_lat,
-                        'lng'      : hotel_lng,
-                        'image_url': image_url,  # ✅ save image URL
-                    }
-                )
-
-            messages.success(request, f"Hotels in {city} loaded successfully!")
-
+            
+            print(f"✅ Found coordinates: {lat}, {lng}")
+            
+            # ... rest of your code
+            
         except Exception as e:
-            messages.error(request, f"Something went wrong: {str(e)}")
-
+            messages.error(request, f"Error: {str(e)}")
+            print(f"❌ Exception: {str(e)}")
+            import traceback
+            traceback.print_exc()  # ✅ Print full error trace
+    
     hotels = Hotel.objects.all()
     return render(request, 'hotels_api.html', {'hotels': hotels})
-
-
-############################################################################ 
-""" this is to secure the API key
-bash 
-pip install python-dotenv
-```
-
-Create a `.env` file in your project root:
-```
-GOOGLE_API_KEY=your_actual_key_here
-
-views.py
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')  # ✅ safe
-"""
-##########################################################################
-
-

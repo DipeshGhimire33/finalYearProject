@@ -18,8 +18,8 @@ class UserProfile(models.Model):
 
 class Hotel(models.Model):
     name      = models.CharField(max_length=255)
-    location  = models.CharField(max_length=255, blank=True)
-    address   = models.CharField(max_length=255, blank=True)
+    location  = models.CharField(max_length=255, blank=True,null=True)
+    address   = models.CharField(max_length=255, blank=True,null=True)
     phone     = models.CharField(max_length=50,  blank=True)
     website   = models.URLField(blank=True)
     lat       = models.FloatField(null=True, blank=True)
@@ -79,36 +79,9 @@ class GuideAvailability(models.Model):
         return f"{self.guide} availability"
 
 
-# =====================================================
-# RESTAURANT
-# =====================================================
-class Restaurant(models.Model):
-    name = models.CharField(max_length=100)
-    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='restaurants')
-    email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=15)
-    image = models.ImageField(upload_to='restaurants/')
-    cuisine_type = models.CharField(max_length=100)
-    average_cost = models.DecimalField(max_digits=8, decimal_places=2)
-    is_open = models.BooleanField(default=True)
-    rating_avg = models.DecimalField(max_digits=3, decimal_places=2, default=0)
-
-    def __str__(self):
-        return self.name
 
 
-# =====================================================
-# HOTEL
-# =====================================================
-class Hotel(models.Model):
-    name = models.CharField(max_length=100)
-    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='hotels')
-    phone = models.CharField(max_length=15,)
-    price_per_night = models.DecimalField(max_digits=8, decimal_places=2)
-    is_available = models.BooleanField(default=True)
 
-    def __str__(self):
-        return self.name
 
 
 # =====================================================
@@ -233,7 +206,7 @@ class Refund(models.Model):
 class Review(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     guide = models.ForeignKey(Guide, on_delete=models.CASCADE, null=True, blank=True, related_name='reviews')
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, null=True, blank=True, related_name='reviews')
+    hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, null=True, blank=True, related_name='reviews')
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     review_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
