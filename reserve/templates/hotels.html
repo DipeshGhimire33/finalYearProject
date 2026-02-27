@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% for hotel in hotels  %}
+
+<h1>{{ hotel.name }}</h1>
+<p>{{ hotel.description }}</p>
+<p>Price per night: {{ hotel.price_per_night }}</p>
+<p>Available rooms: {{ hotel.available_rooms }}</p>
+<p>Rating:⭐️{{hotel.review}}</p>
+<img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" width="300">
+
+
+{% endfor %}
+{% endblock content %}

@@ -1,13 +1,14 @@
 # Create your views here.
 import os
+from urllib import request
 from dotenv import load_dotenv
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import CustomerRegistrationForm
-from .models import Hotel, UserProfile
-import requests
+from .forms import CustomerRegistrationForm, HotelRegistrationForm
+from .models import Customer, Hotel, HotelOwner, UserProfile, Room, Guide, Booking
+
 from django.shortcuts import render
 
 load_dotenv()
@@ -51,132 +52,147 @@ def register(request):
 
     return render(request, 'registration/register.html', {'form': form})
 
+def HotelList(request):
+    hotels=Hotel.objects.all().order_by('-rating')  # Get all hotels ordered by rating 
+    return render(request, 'hotels.html', {'hotels': hotels})
 
-def get_photo_url(photo_reference):
-    if photo_reference:
-        return (
-            f"https://maps.googleapis.com/maps/api/place/photo"
-            f"?maxwidth=800"
-            f"&photoreference={photo_reference}"
-            f"&key={GOOGLE_API_KEY}"
-        )
-    return None
-
-
-# def hotelsAPI(request):
-    
-    
-#     if request.method == "POST":
-#         city = request.POST.get('city', '').strip()
-#     if request.method == "POST":
-#         city = request.POST.get('city', '').strip()
-        
-#         if not city:
-#             messages.error(request, "Please enter a city name!")
-#             return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
-        
-#         try:
-#             # Step 1: Get city coordinates
-#             geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={city}&key={GOOGLE_API_KEY}"
-#             geo_response = requests.get(geocode_url).json()
-            
-#             if not geo_response.get('results'):
-#                 messages.error(request, f"City '{city}' not found.")
-#                 return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
-            
-#             location = geo_response['results'][0]['geometry']['location']
-#             lat, lng = location['lat'], location['lng']
-            
-#             # Step 2: Search for hotels
-#             places_url = (
-#                 f"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-#                 f"?location={lat},{lng}"
-#                 f"&radius=5000"
-#                 f"&type=lodging"
-#                 f"&key={GOOGLE_API_KEY}"
-#             )
-#             places_response = requests.get(places_url).json()
-#             results = places_response.get('results', [])
-            
-#             if not results:
-#                 messages.warning(request, f"No hotels found in {city}.")
-            
-#             # Step 3: Save hotels to database
-#             for result in results:
-#                 photos = result.get('photos', [])
-#                 photo_ref = photos[0].get('photo_reference') if photos else None
-#                 image_url = get_photo_url(photo_ref)
-                
-#                 name = result.get('name', 'Unknown Hotel')
-#                 address = result.get('vicinity', 'N/A')
-#                 hotel_lat = result['geometry']['location']['lat']
-#                 hotel_lng = result['geometry']['location']['lng']
-                
-#                 Hotel.objects.get_or_create(
-#                     name=name,
-#                     defaults={
-#                         'location': city,
-#                         'address': address,
-#                         'lat': hotel_lat,
-#                         'lng': hotel_lng,
-#                         'image_url': image_url,
-#                     }
-#                 )
-            
-#             messages.success(request, f"Loaded {len(results)} hotels in {city}!")
-            
-#         except Exception as e:
-#             messages.error(request, f"Error: {str(e)}")
-    
-#     hotels = Hotel.objects.all()
-#     return render(request, 'hotels_api.html', {'hotels': hotels})
-
-
-def hotelsAPI(request):
+@login_required
+def HotelRegistration(request):
     if request.method == "POST":
-        city = request.POST.get('city', '').strip()
-        
-        if not city:
-            messages.error(request, "Please enter a city name!")
-            return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
-        
-        try:
-            # Step 1: Get city coordinates
-            geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={city}&key={GOOGLE_API_KEY}"
-            
-            print(f"🔍 Searching for: {city}")
-            print(f"📡 Request URL: {geocode_url}")
-            
-            geo_response = requests.get(geocode_url).json()
-            
-            print(f"📦 Full API Response:")
-            print(geo_response)  # ✅ This will show us EVERYTHING
-            print(f"📊 Status: {geo_response.get('status')}")
-            
-            # Check for API errors
-            if geo_response.get('status') == 'REQUEST_DENIED':
-                error_msg = geo_response.get('error_message', 'API access denied')
-                messages.error(request, f"API Error: {error_msg}")
-                print(f"❌ REQUEST DENIED: {error_msg}")
-                return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
-            
-            if not geo_response.get('results'):
-                messages.error(request, f"City '{city}' not found.")
-                print(f"❌ No results for {city}")
-                return render(request, 'hotels_api.html', {'hotels': Hotel.objects.all()})
-            
-            location = geo_response['results'][0]['geometry']['location']
-            lat, lng = location['lat'], location['lng']
-            
-            print(f"✅ Found coordinates: {lat}, {lng}")
-            
-            # ... rest of your code
-            
-        except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
-            print(f"❌ Exception: {str(e)}")
-            import traceback
-            traceback.print_exc()  # ✅ Print full error trace
+        form = HotelRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            hotel = form.save()
+            messages.success(request, "Hotel registered successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = HotelRegistrationForm()
+
+    return render(request, 'hotel_reg_form.html', {'form': form})
+
+def search(request):
+    query = request.GET.get('search')
+    if query:
+        hotel = Hotel.objects.filter(name__icontains=query)
+    else:
+        hotel = Hotel.objects.all()
     
-    hotels = Hotel.objects.all()
-    return render(request, 'hotels_api.html', {'hotels': hotels})
+    return render(request, 'search.html', {'query': query, 'hotel': hotel})
+
+
+@login_required
+def EditHotel(request, pk):
+    hotel = get_object_or_404(Hotel, id=pk)
+    if request.method == "POST":
+        form = HotelRegistrationForm(request.POST, request.FILES, instance=hotel)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Hotel updated successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = HotelRegistrationForm(instance=hotel)
+
+    return render(request, 'hotel_reg_form.html', {'form': form})
+
+@login_required
+def book_room(request, hotel_id):
+ 
+    hotel = get_object_or_404(Hotel, id=hotel_id)
+    rooms = Room.objects.filter(hotel=hotel, available_rooms__gt=0)
+    guides = Guide.objects.filter(is_available=True)
+    
+    if request.method == 'POST':
+        # Get form data
+        room_id = request.POST.get('room_id')
+        guide_id = request.POST.get('guide_id')
+        check_in = request.POST.get('check_in')
+        check_out = request.POST.get('check_out')
+        num_rooms = int(request.POST.get('num_rooms', 1))
+        
+        room = get_object_or_404(Room, id=room_id)
+        
+        # Check if enough rooms available
+        if room.available_rooms < num_rooms:
+            messages.error(request, 'Not enough rooms available!')
+            return redirect('book_room', hotel_id=hotel_id)
+        
+        # Calculate total
+        from datetime import datetime
+        nights = (datetime.strptime(check_out, '%Y-%m-%d') - 
+                 datetime.strptime(check_in, '%Y-%m-%d')).days
+        total = room.price * nights * num_rooms
+        
+        # Add guide cost if selected
+        guide = None
+        if guide_id:
+            guide = get_object_or_404(Guide, id=guide_id)
+            total += guide.price * nights
+        
+        # Create booking
+        booking = Booking.objects.create(
+            user=request.user,
+            hotel=hotel,
+            room=room,
+            guide=guide,
+            check_in=check_in,
+            check_out=check_out,
+            num_rooms=num_rooms,
+            total_price=total
+        )
+        
+        # DECREASE ROOM COUNT
+        room.available_rooms -= num_rooms
+        room.save()
+        
+        messages.success(request, f'Booking confirmed! Total: ${total}')
+        return redirect('booking_success', booking_id=booking.id)
+    
+    return render(request, 'booking_form.html', {
+        'hotel': hotel,
+        'rooms': rooms,
+        'guides': guides
+    })
+
+@login_required
+def cancel_booking(request, booking_id):
+    """Cancel booking and restore rooms"""
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
+    # INCREASE ROOM COUNT BACK
+    booking.room.available_rooms += booking.num_rooms
+    booking.room.save()
+    
+    booking.delete()
+    messages.success(request, 'Booking cancelled!')
+    return redirect('hotels')
+
+@login_required
+def deleteHotel(request, pk):
+    if request.method == "POST":
+        hotel = get_object_or_404(Hotel, id=pk,user=request.user)
+        hotel.delete()
+        messages.success(request, "Hotel deleted successfully!")
+    return redirect('hotels')
+
+@login_required
+def deleteGuide(request, pk):
+    if request.method == "POST":
+        guide = get_object_or_404(Guide, id=pk,user=request.user)
+        guide.delete()
+        messages.success(request, "Guide deleted successfully!")
+    return redirect('dashboard')
+
+@login_required
+def customerDetails(request):
+    customer = get_object_or_404(user=request.user)
+    return render(request, 'customer_details.html', {'customer': customer})
+
+def hotelOwnerdetails(request):
+    hotel_owner = get_object_or_404(HotelOwner, user=request.user)
+    return render(request, 'hotel_owner_details.html', {'hotel_owner': hotel_owner})
+
+
+

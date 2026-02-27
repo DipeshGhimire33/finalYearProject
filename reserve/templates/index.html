@@ -2,6 +2,7 @@
 {% block content %}
 <h1>Welcome to the Hotel Reservation System</h1>
 <p>Explore our wide range of hotels and make your reservation today!</p>    
-<a href="{% url "hotels_api" %}">Search Hotels</a>
+<a href="{% url "hotels" %}">Search Hotels</a> <br>
+<a href="{% url "book_room" hotel_id=1 %}">Book Room</a>
 
 {% endblock content %}
