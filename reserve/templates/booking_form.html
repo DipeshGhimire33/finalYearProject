@@ -1,0 +1,77 @@
+{% include "base.html" %}
+
+
+{% block head %}
+<head>
+    <title>Book {{ hotel.name }}</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .form-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; font-size: 16px; }
+        .room-option { border: 1px solid #ddd; padding: 15px; margin: 10px 0; }
+        .room-option:hover { background: #f0f0f0; }
+        button { background: #007bff; color: white; padding: 15px 30px; 
+                 border: none; font-size: 18px; cursor: pointer; width: 100%; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+
+{% endblock head %}
+<body>
+{% block content %}
+    <h1>Book at {{ hotel.name }}</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>Check-in:</label>
+            <input type="date" name="check_in" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Check-out:</label>
+            <input type="date" name="check_out" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Number of Rooms:</label>
+            <input type="number" name="num_rooms" value="1" min="1" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Select Room:</label>
+            {% for room in rooms %}
+                <label class="room-option">
+                    <input type="radio" name="room_id" value="{{ room.id }}" required>
+                    {{ room.room_type }} - ${{ room.price }}/night 
+                    ({{ room.available_rooms }} available)
+                </label>
+            {% endfor %}
+        </div>
+        
+        <div class="form-group">
+            <label>Select Guide (Optional):</label>
+            <select name="guide_id">
+                <option value="">No guide</option>
+                {% for guide in guides %}
+                    <option value="{{ guide.id }}">
+                        {{ guide.name }} - {{ guide.specialization }} (${{ guide.price }}/day)
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <button type="submit">Confirm Booking</button>
+    </form>
+
+{% endblock content %}
+</body>
+</html>

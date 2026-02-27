@@ -138,4 +138,4 @@ LOGIN_REDIRECT_URL = "/reserve/" #/here we enter the url where we want to redire
 LOGOUT_REDIRECT_URL = "/reserve/"   #/here we enter the url where we want to redirect after logout
 
 # Email backend settings for password reset
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
