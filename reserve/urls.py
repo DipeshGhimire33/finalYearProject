@@ -17,4 +17,4 @@ urlpatterns = [
     path('hotel_owner/details/', views.hotelOwnerdetails, name='hotel_owner_details'),
     #path("reserve/", views.reserve, name="reserve"),
     
-]
+] 
