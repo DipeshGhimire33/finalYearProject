@@ -1,6 +1,7 @@
 # Create your views here.
 import os
 from urllib import request
+from django.conf import settings
 from dotenv import load_dotenv
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -8,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import CustomerRegistrationForm, HotelRegistrationForm
 from .models import Customer, Hotel, HotelOwner, UserProfile, Room, Guide, Booking
+from django.core.mail import send_mail
 
 from django.shortcuts import render
 
@@ -147,7 +149,16 @@ def book_room(request, hotel_id):
         room.available_rooms -= num_rooms
         room.save()
         
-        messages.success(request, f'Booking confirmed! Total: ${total}')
+        messages.success(request, f'Booking confirmed! Please check your email for booking details. Total: ${total}')
+        send_mail(
+            subject='Booking Confirmation',
+            message=f'Your booking for {booking.room} is confirmed!',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[request.user.email],
+            fail_silently=False,
+        )
+        
+        messages.success(request, 'Booking confirmed! Email sent.')
         return redirect('booking_success', booking_id=booking.id)
     
     return render(request, 'booking_form.html', {
