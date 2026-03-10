@@ -1,0 +1,37 @@
+/* ================= GLOBAL ================= */
+body {
+    margin: 0;
+    text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f8fafc;
+    overflow-x: hidden; /* Prevent horizontal scroll bugs */
+}
+
+/* ================= GLOBAL SPACING FIX ================= */
+
+section {
+    width: 100%;
+}
+
+
+
+
+@media (max-width: 1024px) {
+    .hero-content h1 { font-size: 36px; }
+    .hero-content p { font-size: 16px; }
+
+    .slider-wrapper {
+        width: 720px; /* 2 visible on medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+
+    .slider-wrapper {
+        width: 320px; /* 1 visible on mobile */
+    }
+    .feature-container {
+        flex-direction: column;
+        gap: 30px;
+    }
+}

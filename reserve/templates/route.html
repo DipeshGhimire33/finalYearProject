@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<hr style="border: 1px solid #f8fafc;; margin: 20px 0;">
+<section class="route-page">
+
+<h1 class="page-title">Your Travel Route</h1>
+
+<!-- ROUTE SUMMARY -->
+
+<div class="route-summary">
+
+<p><strong>Destination:</strong> Pokhara</p>
+<p><strong>Vacation Days:</strong> 5</p>
+<p><strong>Suggested Route:</strong> Kathmandu → Mugling → Pokhara</p>
+
+</div>
+
+
+<!-- MAP SECTION -->
+
+<div class="map-container">
+
+<div id="routeMap">
+Map will appear here
+</div>
+
+</div>
+
+
+<!-- HOMESTAY OPTIONS -->
+
+<h2 class="stay-title">Available Homestays</h2>
+
+<div class="homestay-grid">
+
+
+<!-- HOMESTAY CARD -->
+
+<div class="homestay-card">
+
+<img src="{% static 'images/homestay/h1.jpg' %}">
+
+<div class="stay-info">
+
+<h3>Lake View Homestay</h3>
+
+<p>Location: Pokhara Lakeside</p>
+
+<p>Status: <span class="available">Available</span></p>
+
+
+<select class="room-select">
+
+<option value="">Select Room</option>
+
+<option value="room1">
+Room A — 2 people — 3 rooms available
+</option>
+
+<option value="room2">
+Family Room — 4 people — 2 rooms available
+</option>
+
+</select>
+
+
+<div class="stay-buttons">
+
+<button class="book-btn">Book</button>
+
+<button class="cancel-btn">Cancel</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- HOMESTAY CARD -->
+
+<div class="homestay-card">
+
+<img src="{% static 'images/homestay/h2.jpg' %}">
+
+<div class="stay-info">
+
+<h3>Mountain Breeze Lodge</h3>
+
+<p>Location: Sarangkot</p>
+
+<p>Status: <span class="unavailable">Unavailable</span></p>
+
+<select disabled>
+
+<option>No rooms available</option>
+
+</select>
+
+<div class="stay-buttons">
+
+<button class="book-btn disabled">Book</button>
+
+<button class="cancel-btn disabled">Cancel</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- HOMESTAY CARD -->
+
+<div class="homestay-card">
+
+<img src="{% static 'images/homestay/h3.jpg' %}">
+
+<div class="stay-info">
+
+<h3>Peaceful Village Stay</h3>
+
+<p>Location: Hemja</p>
+
+<p>Status: <span class="available">Available</span></p>
+
+<select class="room-select">
+
+<option>Select Room</option>
+
+<option>Standard Room — 2 people — 5 available</option>
+
+<option>Family Room — 5 people — 1 available</option>
+
+</select>
+
+<div class="stay-buttons">
+
+<button class="book-btn">Book</button>
+
+<button class="cancel-btn">Cancel</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+</section>
+
+{% endblock %}

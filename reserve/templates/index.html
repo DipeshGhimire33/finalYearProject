@@ -1,13 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+{% extends 'base.html' %}
+{% load static %}
 
-</head>
-<body>
-    <h1>Hii</h1>
-    
-</body>
-</html>
+{% block content %}
+
+<!-- ================= HERO SECTION ================= -->
+<section class="hero-section">
+    <div class="hero-slider">
+        <div class="slide active" style="background-image: url('{% static "images/destinations/destination1.jpg" %}');"></div>
+        <div class="slide" style="background-image: url('{% static "images/destinations/destination2.jpg" %}');"></div>
+        <div class="slide" style="background-image: url('{% static "images/destinations/destination3.jpg" %}');"></div>
+        <div class="slide" style="background-image: url('{% static "images/destinations/destination4.jpg" %}');"></div>
+    </div>
+
+    <div class="hero-content">
+        <h1>Explore Your Next Adventure</h1>
+        <p>Discover local homestays, curated packages, and unique destinations.</p>
+        <a href="#" class="hero-btn">Explore Now</a>
+    </div>
+</section>
+
+<section class="popular-destinations">
+    <h2>Choose Your Destination</h2>
+    <div class="destination-carousel" id="popular-carousel">
+        <div class="carousel-track">
+            <div class="destination-card" data-link="destinations/">
+                <img src="{% static 'images/destinations/destination1.jpg' %}" alt="Mountain Escape">
+                <h3>Mountain Escape</h3>
+            </div>
+            <div class="destination-card" data-link="destinations/">
+                <img src="{% static 'images/destinations/destination2.jpg' %}" alt="Beach Paradise">
+                <h3>Beach Paradise</h3>
+            </div>
+            <div class="destination-card" data-link="destinations/">
+                <img src="{% static 'images/destinations/destination3.jpg' %}" alt="City Lights">
+                <h3>City Lights</h3>
+            </div>
+            <div class="destination-card" data-link="destinations/">
+                <img src="{% static 'images/destinations/destination4.jpg' %}" alt="Forest Retreat">
+                <h3>Forest Retreat</h3>
+            </div>
+        </div>
+
+        <div class="carousel-controls">
+            <button class="carousel-btn prev">Prev</button>
+            <div class="carousel-pagination"></div>
+            <button class="carousel-btn next">Next</button>
+        </div>
+    </div>
+</section>
+
+{% include 'booknow.html' %}
+
+<!-- Three Feature Blocks -->
+<section class="feature-blocks">
+    <div class="feature-container">
+        <!-- Packages Block -->
+        <div class="feature-card clickable-card" data-link="packages/" id="packages">
+            <h3>Best Packages</h3>
+            <img src="https://source.unsplash.com/400x200/?travel,package" alt="Package">
+            <p>Our most popular travel packages for adventurous tourists.</p>
+        </div>
+
+        <!-- Reviews Block -->
+        <div class="feature-card clickable-card" data-link="comments/" id="reviews">
+            <h2>What Our Travelers Say</h2>
+            <section class="rating-feature-block">
+
+    <div 
+        class="rating-summary clickable-rating" 
+        id="goToComments"
+        role="button"
+        tabindex="0"
+        aria-label="View all reviews"
+    >
+
+        <div class="average-rating">
+            <span id="averageRating">0</span>
+            <small>/ 5 Average Rating</small>
+        </div>
+
+        <div class="top-review">
+            <h4>Top Review</h4>
+            <p id="topReviewText">No reviews yet.</p>
+            <span id="topReviewer"></span>
+        </div>
+
+    </div>
+
+</section>
+        </div>
+
+        <!-- Happy Smiles Block -->
+        <div class="feature-card clickable-card" data-link="gallery/" id="happysmiles">
+            <h3>Happy Smiles</h3>
+            <img src="https://source.unsplash.com/400x200/?smile,tourist" alt="Happy Smiles">
+            <p>Our customers sharing their joyful travel moments.</p>
+        </div>
+    </div>
+</section>
+<script src="{% static 'js/index.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,34 @@
+document.addEventListener("DOMContentLoaded",function(){
+
+const bookBtns=document.querySelectorAll(".book-btn");
+const cancelBtns=document.querySelectorAll(".cancel-btn");
+
+bookBtns.forEach(btn=>{
+
+btn.addEventListener("click",function(){
+
+if(btn.classList.contains("disabled")) return;
+
+btn.innerText="Booked";
+btn.style.background="#2e7d32";
+
+});
+
+});
+
+cancelBtns.forEach(btn=>{
+
+btn.addEventListener("click",function(){
+
+if(btn.classList.contains("disabled")) return;
+
+const bookBtn=this.parentElement.querySelector(".book-btn");
+
+bookBtn.innerText="Book";
+bookBtn.style.background="#4caf50";
+
+});
+
+});
+
+});

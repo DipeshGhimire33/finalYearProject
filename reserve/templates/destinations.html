@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- ================= DESTINATION HERO ================= -->
+<section class="destination-hero">
+    <img src="{% static 'images/destinations/destination1.jpg' %}" alt="Destination image">
+</section>
+
+<!-- ================= POPULAR DESTINATIONS ================= -->
+<section class="popular-destinations">
+    <h2>Popular Destinations</h2>
+    <div class="destination-carousel" id="popular-carousel">
+        <div class="carousel-track">
+            <div class="destination-card">
+                <img src="{% static 'images/destinations/destination1.jpg' %}" alt="Mountain Escape">
+                <h3>Mountain Escape</h3>
+            </div>
+            <div class="destination-card" >
+                <img src="{% static 'images/destinations/destination2.jpg' %}" alt="Beach Paradise">
+                <h3>Beach Paradise</h3>
+            </div>
+            <div class="destination-card" >
+                <img src="{% static 'images/destinations/destination3.jpg' %}" alt="City Lights">
+                <h3>City Lights</h3>
+            </div>
+            <div class="destination-card" >
+                <img src="{% static 'images/destinations/destination4.jpg' %}" alt="Forest Retreat">
+                <h3>Forest Retreat</h3>
+            </div>
+        </div>
+
+        <div class="carousel-controls">
+            <button class="carousel-btn prev">Prev</button>
+            <div class="carousel-pagination"></div>
+            <button class="carousel-btn next">Next</button>
+        </div>
+    </div>
+</section>
+
+<!-- ================= MUST VISIT DESTINATIONS ================= -->
+<section class="must-visit-destinations">
+    <h2>Must Visit</h2>
+    <div class="destination-carousel" id="mustvisit-carousel">
+        <div class="carousel-track">
+            <div class="destination-card">
+                <img src="{% static 'images/destinations/destination1.jpg' %}" alt="Mountain Escape">
+                <h3>Mountain Escape</h3>
+            </div>
+            <div class="destination-card">
+                <img src="{% static 'images/destinations/destination2.jpg' %}" alt="Beach Paradise">
+                <h3>Beach Paradise</h3>
+            </div>
+            <div class="destination-card" >
+                <img src="{% static 'images/destinations/destination3.jpg' %}" alt="City Lights">
+                <h3>City Lights</h3>
+            </div>
+            <div class="destination-card">
+                <img src="{% static 'images/destinations/destination4.jpg' %}" alt="Forest Retreat">
+                <h3>Forest Retreat</h3>
+            </div>
+        </div>
+
+        <div class="carousel-controls">
+            <button class="carousel-btn prev">Prev</button>
+            <div class="carousel-pagination"></div>
+            <button class="carousel-btn next">Next</button>
+        </div>
+    </div>
+</section>
+
+{% include 'booknow.html' %}
+
+{% endblock %}
+

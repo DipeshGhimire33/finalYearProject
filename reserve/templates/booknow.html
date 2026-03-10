@@ -1,0 +1,40 @@
+ <button class="book-now-btn">Book Now</button>
+    <!-- ================= BOOKING MODAL ================= -->
+<div class="booking-modal" id="bookingModal">
+    <div class="booking-content">
+
+        <span class="close-modal">&times;</span>
+
+        <h2>Book Your Tour</h2>
+
+        <form id="bookingForm" action="{% url 'route' %}">
+
+            <input type="text" name="fullname" placeholder="Full Name" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="text" name="pickup" placeholder="Pickup Location" required>
+            <input type="text" name="destination" placeholder="Destination Location" required>
+            <input type="number" name="people" placeholder="Number of People" min="1" required>
+            <input type="number" name="days" placeholder="Number of Tour Days" min="1" required>
+
+            <div class="modal-buttons">
+                <button type="submit" class="submit-btn">Submit</button>
+                <button type="button" class="cancel-btn">Cancel</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<!-- ================= CONFIRMATION MODAL ================= -->
+<div class="confirm-modal" id="confirmModal">
+    <div class="confirm-content">
+        <h3>Please Confirm Your Booking</h3>
+        <div id="confirmDetails"></div>
+
+        <div class="modal-buttons">
+            <button class="confirm-btn">Confirm</button>
+            <button class="back-btn">Cancel</button>
+        </div>
+    </div>
+</div>

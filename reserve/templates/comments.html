@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="comments-page">
+<hr style="border: 1px solid #f8fafc;; margin: 20px 0;">
+    <h2 class="comments-title">Traveler Reviews</h2>
+
+    <!-- COMMENT INPUT -->
+    <div class="comment-input-box">
+
+        <form id="commentForm">
+
+            <input type="text" id="commentName" placeholder="Your name" required>
+
+            <textarea id="commentText" placeholder="Share your travel experience..." required></textarea>
+
+            <div class="comment-bottom">
+
+                <!-- Rating -->
+                <div class="star-rating" id="starRating">
+                    <span data-value="1">★</span>
+                    <span data-value="2">★</span>
+                    <span data-value="3">★</span>
+                    <span data-value="4">★</span>
+                    <span data-value="5">★</span>
+                </div>
+
+                <button type="submit">Post Comment</button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- COMMENTS LIST -->
+    <div id="commentsList" class="comments-list"></div>
+
+</section>
+
+<!-- <link rel="stylesheet" href="{% static 'css/comments.css' %}">
+<script src="{% static 'js/comments.js' %}"></script> -->
+
+{% endblock %}

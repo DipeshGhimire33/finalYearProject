@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<hr style="border: 1px solid #f8fafc;; margin: 20px 0;">
+<section class="gallery-page">
+
+<!-- HERO SECTION -->
+
+<section class="hero-section small">
+
+<div class="hero-slider">
+
+ <div class="slide active" style="background-image: url('{% static "images/gallery/gallery1.jpg" %}');"></div>
+        <div class="slide" style="background-image: url('{% static "images/gallery/gallery2.jpg" %}');"></div>
+        <div class="slide" style="background-image: url('{% static "images/gallery/gallery3.jpg" %}');"></div>
+        <div class="slide" style="background-image: url('{% static "images/gallery/gallery4.jpg" %}');"></div>
+
+</div>
+
+<div class="hero-content">
+<h1>Happy Smiles</h1>
+<p>Memories from our travelers</p>
+</div>
+
+</section>
+
+
+<!-- FILTER -->
+<hr style="border: 1px solid #f8fafc;; margin: 20px 0;">
+<div class="gallery-filter">
+
+<button data-filter="all">All</button>
+<button data-filter="everest">Everest</button>
+<button data-filter="annapurna">Annapurna</button>
+<button data-filter="pokhara">Pokhara</button>
+
+</div>
+
+
+<!-- GALLERY GRID -->
+
+<section class="gallery-grid" id="galleryGrid">
+
+<div class="gallery-card" data-category="everest">
+
+<img src="{% static 'images/gallery/gallery1.jpg' %}">
+
+<div class="card-info">
+<span class="username">Alex</span>
+<p>Everest Base Camp trek!</p>
+<div class="like-btn">❤️ <span>0</span></div>
+</div>
+
+</div>
+
+
+<div class="gallery-card" data-category="annapurna">
+
+<img src="{% static 'images/gallery/gallery2.jpg' %}">
+
+<div class="card-info">
+<span class="username">Maya</span>
+<p>Beautiful Annapurna views</p>
+<div class="like-btn">❤️ <span>0</span></div>
+</div>
+
+</div>
+
+
+<div class="gallery-card" data-category="pokhara">
+
+<img src="{% static 'images/gallery/gallery3.jpg' %}">
+
+<div class="card-info">
+<span class="username">John</span>
+<p>Sunset at Pokhara lake</p>
+<div class="like-btn">❤️ <span>0</span></div>
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- UPLOAD -->
+
+<section class="upload-experience">
+
+<h2>Upload Your Experience</h2>
+
+<form id="uploadForm">
+
+<input type="text" id="username" placeholder="Your Name" required>
+
+<select id="destination">
+<option value="everest">Everest</option>
+<option value="annapurna">Annapurna</option>
+<option value="pokhara">Pokhara</option>
+</select>
+
+<input type="file" id="imageUpload" accept="image/*" required>
+
+<textarea id="caption" placeholder="Share your experience"></textarea>
+
+<button type="submit">Upload Photo</button>
+
+</form>
+
+</section>
+
+
+
+<!-- LIGHTBOX -->
+
+<div class="lightbox" id="lightbox">
+
+<span class="close-lightbox">&times;</span>
+
+<img id="lightboxImage">
+
+</div>
+
+</section>
+
+{% endblock %}

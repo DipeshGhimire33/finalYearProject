@@ -1,0 +1,94 @@
+
+
+/* =================INDEX Feature block ================= */
+.feature-container {
+    display: flex;
+    justify-content: space-around;
+    padding: 60px 5%;
+    flex-direction: row;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    width: 30%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.feature-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 15px;
+}
+.feature-card h3 {
+    margin: 15px 0 10px;
+    font-size: 22px;
+}
+.feature-card p {
+    font-size: 16px;
+    color: #555;
+}
+
+/* clickable cards */
+
+.clickable-card{
+cursor:pointer;
+transition:all 0.3s ease;
+}
+
+.clickable-card:hover{
+transform:translateY(-8px) scale(1.02);
+box-shadow:0 15px 35px rgba(0,0,0,0.18);
+}
+
+/* ===== RATING FEATURE BLOCK ===== */
+
+.rating-feature-block {
+    width: 90%;
+    height: auto;
+    max-width: 1000px;
+    margin: 80px auto;
+    text-align: center;
+}
+
+.rating-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.average-rating {
+    font-size: 48px;
+    font-weight: bold;
+    color: #335997;
+}
+
+.average-rating small {
+    font-size: 16px;
+    display: block;
+    color: #777;
+}
+
+.top-review {
+    max-width: 400px;
+    text-align: left;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.top-review h4 {
+    margin-bottom: 10px;
+}
+
+#topReviewer {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #777;
+}
+

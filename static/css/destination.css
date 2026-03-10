@@ -1,0 +1,150 @@
+/* ================= DESTINATION HERO ================= */
+.destination-hero img {
+    width: 100%;
+    height: 60vh;
+    object-fit: cover;
+    margin-bottom: 50px;
+}
+
+/* ================= DESTINATION CAROUSEL ================= */
+.destination-carousel {
+    position: relative;
+    width: 90%;
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+.carousel-track {
+    position: relative;
+    height: 320px;
+    overflow: hidden; /* show only 3 cards at a time */
+}
+
+.destination-card {
+    position: absolute;
+    top: 50%;
+    width: 300px;
+    transform: translateY(-50%) scale(0.85);
+    transition: all 0.5s ease;
+    opacity: 0;
+    cursor: pointer;
+    border-radius: 15px;
+    background: white;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.destination-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+.destination-card h3 {
+    margin: 12px 0;
+    font-size: 18px;
+}
+
+/* Positions */
+.destination-card.center {
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%) scale(1.15);
+    opacity: 1;
+    z-index: 3;
+}
+.destination-card.left {
+    left: 15%;
+    transform: translateY(-50%) scale(0.9);
+    opacity: 0.6;
+    filter: blur(1px);
+    z-index: 2;
+}
+.destination-card.right {
+    left: 85%;
+    transform: translateX(-100%) translateY(-50%) scale(0.9);
+    opacity: 0.6;
+    filter: blur(1px);
+    z-index: 2;
+}
+
+/* Buttons */
+.carousel-controls {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.carousel-btn {
+    padding: 10px 25px;
+    background: #4facfe;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.carousel-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Pagination dots */
+.carousel-pagination {
+    display: flex;
+    gap: 8px;
+}
+
+.carousel-pagination .dot {
+    width: 12px;
+    height: 12px;
+    background: #cbd5e1;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.carousel-pagination .dot.active {
+    background: #111;
+    transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+    .destination-carousel {
+        height: auto;
+    }
+
+    .carousel-track {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+        position: relative !important; /* reset absolute stacking */
+    }
+
+    .destination-card {
+        position: relative !important;
+        flex: 0 0 100%; /* show 1 card per view */
+        left: 0 !important;
+        transform: none !important;
+        opacity: 1 !important;
+        filter: none !important;
+        margin: 0 auto;
+    }
+    .destination-card img {
+        width: 100%;
+        height: auto;   /* preserve aspect ratio */
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    .destination-card.center,
+    .destination-card.left,
+    .destination-card.right {
+        transform: none !important;
+        left: auto !important;
+        right: auto !important;
+        opacity: 1;
+        filter: none;
+        z-index: 1;
+    }
+}

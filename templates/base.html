@@ -1,15 +1,48 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Tour Trust</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+        <!-- Global CSS -->
+    
+    
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{%static 'css/index.css' %}">
+    <link rel="stylesheet" href="{%static 'css/destination.css' %}">
+    <link rel="stylesheet" href="{% static 'css/form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/comment.css' %}">
+    <link rel="stylesheet" href="{% static 'css/gallery.css' %}">
+    <link rel="stylesheet" href="{% static 'css/heroslider.css' %}">
+    <link rel="stylesheet" href="{% static 'css/route.css' %}">
 </head>
 <body>
-    <div class="container">  
-        <h1>Hello</h1>      
-        {% block content %}
+    {% include 'components/navbar.html' %}
+    
 
-        {% endblock content %}
+    <!-- Page Content Goes Here -->
+    {% block content %}
+    {% endblock %}
+    
+    {% include 'components/footer.html' %}
+
+    
+
+    <!-- Global JS -->
+     <script src="{% static 'js/destination.js' %}"></script>
+     <script src="{% static 'js/form.js' %}"></script>
+    <script src="{% static 'js/hero.js' %}"></script>
+    <script src="{% static 'js/navbar.js' %}"></script>
+    <script src="{% static 'js/comment.js' %}"></script>
+    <script src="{% static 'js/indexcomment.js' %}"></script>
+    <script src="{% static 'js/card.js' %}"></script>
+    <script src="{% static 'js/gallery.js' %}"></script>
+    <script src="{% static 'js/route.js' %}"></script>
+    
 </body>
 </html>

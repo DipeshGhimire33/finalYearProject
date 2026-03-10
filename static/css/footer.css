@@ -1,0 +1,129 @@
+/* =========================
+   PREMIUM GRADIENT FOOTER
+========================= */
+
+/* Reset body spacing */
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+/* Footer Base */
+.footer {
+    background: linear-gradient(135deg, #1e293b, #0f172a, #1e3a8a);
+    color: #e2e8f0;
+    padding: 70px 0 30px 0;
+    width: 100%;  /* full width edge-to-edge */
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+/* Footer Container */
+.footer-container {
+    width: 95%;      /* slightly padded inside */
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Row 1 - Brand */
+.footer-section:first-child {
+    width: 100%;
+    margin-bottom: 50px;
+}
+
+/* Brand Gradient Text (safe) */
+.footer-section h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    background: linear-gradient(to right, #38bdf8, #60a5fa);
+    color: #38bdf8;                /* fallback color */
+    background-clip: text;
+    -webkit-background-clip: text; /* Chrome/Safari fallback */
+    -webkit-text-fill-color: transparent; /* gradient visible */
+}
+
+/* Paragraph */
+.footer-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #cbd5e1;
+}
+
+/* Row 2 - 3 Columns */
+.footer-section:nth-child(n+2) {
+    width: 33.33%;
+}
+
+/* Section Titles */
+.footer-section h4 {
+    font-size: 17px;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+/* Quick Links */
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 12px;
+}
+
+.footer-section ul li a {
+    text-decoration: none;
+    color: #cbd5e1;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+    color: #38bdf8;
+    padding-left: 6px;
+}
+
+/* Contact Icons */
+.footer-section i {
+    margin-right: 8px;
+    color: #60a5fa;
+}
+
+/* Social Icons */
+.social-icons {
+    display: flex;
+    gap: 18px;
+}
+
+.social-icons a {
+    font-size: 18px;
+    color: #cbd5e1;
+    transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+    color: #38bdf8;
+    transform: translateY(-5px);
+}
+
+/* Bottom Bar */
+.footer-bottom {
+    text-align: center;
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+/* -------------------------
+   Responsive
+-------------------------- */
+@media (max-width: 768px) {
+    .footer-section {
+        width: 100% !important;
+        margin-bottom: 35px;
+    }
+}
