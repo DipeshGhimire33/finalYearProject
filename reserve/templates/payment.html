@@ -40,6 +40,14 @@
     </button>
 
   </form>
+  <form method="POST" action="{% url 'payment_success' %}">
+    {% csrf_token %}
+
+    <button type="submit">
+        Confirm Payment (DEV)
+    </button>
+
+</form>
 
 </div>
 {% endblock %}

@@ -1,0 +1,10 @@
+{% include "base.html" %}
+
+{% block content %}
+
+<script>
+    alert("Booking confirmed successfully!");
+    window.location.href = "{% url 'index' %}";
+</script>
+
+{% endblock content %}

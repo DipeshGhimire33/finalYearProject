@@ -8,12 +8,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from dotenv import load_dotenv
-
+from decimal import Decimal
 from .forms import CustomerRegistrationForm, HotelRegistrationForm
 from .models import (Booking, Customer, Guide, Hotel, HotelOwner, Room, Trip,
-                     UserProfile)
+                     UserProfile,Equipment, BookingEquipment, Vehicle, HotelBooking)
 
-load_dotenv()
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 
@@ -45,9 +44,6 @@ def gallery(request):
     return render(request, 'gallery.html')
 
 
-def packages(request):
-    return render(request, 'packages.html')
-
 
 def about_us(request):
     return render(request, 'about_us.html')
@@ -56,14 +52,589 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'contact_us.html')
 
+def book_hotel(request, hotel_id):
+
+    hotel = get_object_or_404(
+        Hotel,
+        id=hotel_id
+    )
+
+    rooms = hotel.rooms.all()
+    guides = Guide.objects.all()
+
+
+    if request.method == "POST":
+
+        room_id = request.POST.get("room_id")
+
+        data = {
+
+            "hotel_id": hotel.id,
+
+            "room_id": room_id,
+
+            "check_in": request.POST.get("check_in"),
+
+            "check_out": request.POST.get("check_out"),
+
+            "num_rooms": request.POST.get("num_rooms"),
+
+            "guide_id": request.POST.get("guide_id"),
+
+        }
+
+
+        request.session["hotel_choice"] = data
+
+
+        return redirect("equipment")
+
+
+
+    return render(
+        request,
+        "book_hotel.html",
+        {
+            "hotel": hotel,
+            "rooms": rooms,
+            "guides": guides
+        }
+    )
+
+@login_required
+def book_room(request, hotel_id):
+
+    hotel = get_object_or_404(
+        Hotel,
+        id=hotel_id
+    )
+
+    rooms = Room.objects.filter(
+        hotel=hotel,
+        available_rooms__gt=0
+    )
+
+    guides = Guide.objects.filter(
+        is_available=True
+    )
+
+
+    if request.method == "POST":
+
+        room_id = request.POST.get("room_id")
+        guide_id = request.POST.get("guide_id")
+
+        check_in = request.POST.get("check_in")
+        check_out = request.POST.get("check_out")
+
+        num_rooms = int(
+            request.POST.get(
+                "num_rooms",
+                1
+            )
+        )
+
+
+        room = get_object_or_404(
+            Room,
+            id=room_id
+        )
+
+
+        if room.available_rooms < num_rooms:
+
+            messages.error(
+                request,
+                "Not enough rooms available"
+            )
+
+            return redirect(
+                "book_room",
+                hotel_id=hotel.id
+            )
+
+
+        guide = None
+
+        if guide_id:
+            guide = get_object_or_404(
+                Guide,
+                id=guide_id
+            )
+
+
+        # SAVE HOTEL BOOKING TABLE
+
+        hotel_booking = HotelBooking.objects.create(
+
+            user=request.user,
+
+            hotel=hotel,
+
+            room=room,
+
+            guide=guide,
+
+            check_in=check_in,
+
+            check_out=check_out,
+
+            num_rooms=num_rooms
+
+        )
+
+
+        # reduce room count
+
+        room.available_rooms -= num_rooms
+        room.save()
+
+
+
+        # store for next step
+        request.session["hotel_choice"] = {
+
+            "hotel_booking_id": hotel_booking.id,
+
+            "hotel_id": hotel.id,
+
+            "room_id": room.id,
+
+            "check_in": check_in,
+
+            "check_out": check_out,
+
+            "num_rooms": num_rooms
+
+        }
+
+
+        return redirect(
+            "equipment"
+        )
+
+
+
+    return render(
+        request,
+        "book_hotel.html",
+        {
+            "hotel":hotel,
+            "rooms":rooms,
+            "guides":guides
+        }
+    )
 
 def equipment(request):
-    return render(request, 'equipment.html')
+
+    equipments = Equipment.objects.all()
+
+    cart = request.session.get("cart", [])
+
+    cart_ids = [item["id"] for item in cart]
+
+    for equipment in equipments:
+        equipment.in_cart = equipment.id in cart_ids
+
+    total_cost = sum(
+        item["price"] * item["qty"]
+        for item in cart
+    )
+
+    return render(
+        request,
+        "equipment.html",
+        {
+            "equipments": equipments,
+            "cart": cart,
+            "total_cost": total_cost,
+        }
+    )
+
+def add_to_cart(request, id):
+
+    equipment = get_object_or_404(Equipment, id=id)
+
+    cart = request.session.get("cart", [])
+
+    for item in cart:
+
+        if item["id"] == equipment.id:
+
+            item["qty"] += 1
+            break
+
+    else:
+
+        cart.append({
+            "id": equipment.id,
+            "name": equipment.name,
+            "price": float(equipment.price_per_day),
+            "qty": 1
+        })
+
+
+    request.session["cart"] = cart
+    request.session.modified = True
+
+    return redirect("equipment")
+
+def remove_from_cart(request, id):
+
+    cart = request.session.get("cart", [])
+
+    cart = [item for item in cart if item["id"] != id]
+
+    request.session["cart"] = cart
+    request.session.modified = True
+
+    return redirect("equipment")
+
+def create_package(request):
+
+    hotel = request.session.get(
+        "hotel_choice"
+    )
+
+    cart = request.session.get(
+        "cart",
+        []
+    )
+
+
+    if not hotel:
+
+        return redirect("index")
+
+
+    if not cart:
+
+        return redirect("equipment")
+
+
+    return redirect("packages")
+
+
+import math
+
+
+def calculate_distance(lat1, lng1, lat2, lng2):
+
+    R = 6371
+
+    dlat = math.radians(lat2 - lat1)
+    dlng = math.radians(lng2 - lng1)
+
+    a = (
+        math.sin(dlat/2)**2
+        +
+        math.cos(math.radians(lat1))
+        *
+        math.cos(math.radians(lat2))
+        *
+        math.sin(dlng/2)**2
+    )
+
+    c = 2 * math.atan2(
+        math.sqrt(a),
+        math.sqrt(1-a)
+    )
+
+    return round(R * c, 2)
+
+
+
+def packages(request):
+
+    trip = Trip.objects.filter(
+        user=request.user
+    ).order_by("-id").first()
+
+
+    if not trip:
+        return redirect("route")
+
+
+    hotel_data = request.session.get(
+        "hotel_choice"
+    )
+
+
+    if not hotel_data:
+        return redirect("hotel")
+
+
+    hotel = Hotel.objects.get(
+        id=hotel_data["hotel_id"]
+    )
+
+
+    room = Room.objects.get(
+        id=hotel_data["room_id"]
+    )
+
+
+    cart = request.session.get(
+        "cart",
+        []
+    )
+
+
+    # equipment cost
+
+    equipment_cost = Decimal(0)
+
+    for item in cart:
+
+        equipment_cost += (
+        Decimal(str(item["price"]))
+        *
+        item["qty"]
+        *
+        trip.days
+        )
+
+
+
+    # vehicle cost
+
+    distance = calculate_distance(
+        trip.pickup_lat,
+        trip.pickup_lng,
+        trip.destination_lat,
+        trip.destination_lng
+    )
+
+
+    if trip.people <= 15:
+
+        rate = 10
+
+    else:
+
+        rate = 50
+
+
+
+    vehicle_cost = Decimal(str(distance * rate))
+
+
+
+    # hotel cost
+
+    hotel_cost = (
+        room.price
+        *
+        int(hotel_data["num_rooms"])
+        *
+        trip.days
+    )
+
+
+
+    total_cost = (
+        hotel_cost
+        +
+        equipment_cost
+        +
+        vehicle_cost
+    )
+
+
+
+    return render(
+        request,
+        "packages.html",
+        {
+
+            "trip": trip,
+
+            "hotel": hotel,
+
+            "room": room,
+
+            "cart": cart,
+
+            "days": trip.days,
+
+            "distance": distance,
+
+            "vehicle_rate": rate,
+
+            "vehicle_cost": vehicle_cost,
+
+            "hotel_cost": hotel_cost,
+
+            "equipment_cost": equipment_cost,
+
+            "total_cost": total_cost,
+
+        }
+    )
 
 
 def payment(request):
     return render(request, 'payment.html')
 
+def route(request, trip_id):
+    trip = get_object_or_404(Trip, id=trip_id)
+    hotels = Hotel.objects.filter(location__icontains=trip.destination, available_rooms__gt=0)
+    if not hotels.exists():
+        hotels = Hotel.objects.filter(available_rooms__gt=0)[:6]
+    return render(request, "route.html", {"trip": trip, "hotels": hotels})
+
+def payment_success(request):
+
+    trip = Trip.objects.filter(
+        user=request.user
+    ).order_by("-id").first()
+
+
+    hotel_data = request.session.get("hotel_choice")
+
+    cart = request.session.get("cart", [])
+
+
+    if not trip or not hotel_data:
+        return redirect("packages")
+
+
+    hotel = get_object_or_404(
+        Hotel,
+        id=hotel_data["hotel_id"]
+    )
+
+
+    room = get_object_or_404(
+        Room,
+        id=hotel_data["room_id"]
+    )
+
+
+    # -----------------------
+    # HOTEL COST
+    # -----------------------
+
+    hotel_cost = (
+        room.price *
+        int(hotel_data["num_rooms"]) *
+        trip.days
+    )
+
+
+    # -----------------------
+    # EQUIPMENT COST
+    # -----------------------
+
+    equipment_cost = 0
+
+    for item in cart:
+
+        equipment_cost += (
+            item["price"]
+            *
+            item["qty"]
+            *
+            trip.days
+        )
+
+
+    # -----------------------
+    # VEHICLE COST
+    # -----------------------
+
+    distance = calculate_distance(
+        trip.pickup_lat,
+        trip.pickup_lng,
+        trip.destination_lat,
+        trip.destination_lng
+    )
+
+
+    if trip.people <= 15:
+        rate = 10
+    else:
+        rate = 50
+
+
+    vehicle_cost = Decimal(str(distance * rate))
+
+
+
+    total = (
+    Decimal(hotel_cost)
+    +
+    Decimal(equipment_cost)
+    +
+    Decimal(vehicle_cost)
+)
+
+
+    # -----------------------
+    # FINAL BOOKING
+    # -----------------------
+
+    booking = Booking.objects.create(
+
+        user=request.user,
+
+        trip=trip,
+
+        hotel=hotel,
+
+        room=room,
+
+        check_in=hotel_data["check_in"],
+
+        check_out=hotel_data["check_out"],
+
+        num_rooms=int(hotel_data["num_rooms"]),
+
+        people=trip.people,
+
+        distance_km=distance,
+
+        vehicle_cost=vehicle_cost,
+
+        total_price=total,
+
+        payment_status=True
+
+    )
+
+
+
+    # -----------------------
+    # SAVE EQUIPMENT
+    # -----------------------
+
+    for item in cart:
+
+        BookingEquipment.objects.create(
+
+            booking=booking,
+
+            equipment_id=item["id"],
+
+            quantity=item["qty"]
+
+        )
+
+
+    # clear temporary session
+
+    request.session.pop("cart", None)
+
+    request.session.pop(
+        "hotel_choice",
+        None
+    )
+
+
+    return redirect(
+        "booking_success",
+        booking_id=booking.id
+    )
 
 def maps(request):
     return render(request, 'maps.html')
@@ -175,73 +746,6 @@ def deleteGuide(request, pk):
 # Booking
 # ---------------------------------------------------------------------------
 
-@login_required
-def book_room(request, hotel_id):
-    hotel  = get_object_or_404(Hotel, id=hotel_id)
-    rooms  = Room.objects.filter(hotel=hotel, available_rooms__gt=0)
-    guides = Guide.objects.filter(is_available=True)
-
-    if request.method == 'POST':
-        room_id    = request.POST.get('room_id')
-        guide_id   = request.POST.get('guide_id')
-        check_in   = request.POST.get('check_in')
-        check_out  = request.POST.get('check_out')
-        num_rooms  = int(request.POST.get('num_rooms', 1))
-
-        room = get_object_or_404(Room, id=room_id)
-
-        if room.available_rooms < num_rooms:
-            messages.error(request, 'Not enough rooms available!')
-            return redirect('book_room', hotel_id=hotel_id)
-
-        nights = (datetime.strptime(check_out, '%Y-%m-%d') -
-                  datetime.strptime(check_in,  '%Y-%m-%d')).days
-
-        if nights <= 0:
-            messages.error(request, 'Check-out must be after check-in.')
-            return redirect('book_room', hotel_id=hotel_id)
-
-        total = room.price * nights * num_rooms
-
-        guide = None
-        if guide_id:
-            guide = get_object_or_404(Guide, id=guide_id)
-            # FIX: was guide.price — correct field is price_per_day
-            total += guide.price_per_day * nights
-
-        booking = Booking.objects.create(
-            user=request.user,
-            hotel=hotel,
-            room=room,
-            guide=guide,
-            check_in=check_in,
-            check_out=check_out,
-            num_rooms=num_rooms,
-            total_price=total,
-        )
-
-        room.available_rooms -= num_rooms
-        room.save()
-
-        try:
-            send_mail(
-                subject='Booking Confirmation',
-                message=f'Your booking for {booking.room} is confirmed! Total: ${total}',
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[request.user.email],
-                fail_silently=False,
-            )
-        except Exception:
-            pass  # Don't let email failure break the booking flow
-
-        messages.success(request, f'Booking confirmed! Total: ${total}')
-        return redirect('booking_success', booking_id=booking.id)
-
-    return render(request, 'booking_form.html', {
-        'hotel': hotel,
-        'rooms': rooms,
-        'guides': guides,
-    })
 
 
 @login_required
@@ -352,10 +856,3 @@ def create_trip(request):
 
     return redirect('maps')
 
-
-def route(request, trip_id):
-    trip = get_object_or_404(Trip, id=trip_id)
-    hotels = Hotel.objects.filter(location__icontains=trip.destination, available_rooms__gt=0)
-    if not hotels.exists():
-        hotels = Hotel.objects.filter(available_rooms__gt=0)[:6]
-    return render(request, "route.html", {"trip": trip, "hotels": hotels})

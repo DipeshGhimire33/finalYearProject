@@ -1,164 +1,148 @@
-
 {% extends "base.html" %}
 {% load static %}
+
 {% block content %}
+
 <link rel="stylesheet" href="{% static 'css/equipment.css' %}">
-{% load static %}
 
 <section class="equipment-section">
 
-  <h2>Equipments</h2>
+    <h2>Equipment</h2>
 
-  <div class="equipment-grid">
+    <div class="equipment-grid">
 
-    {% for equipment in equipments %}
-    <div class="equipment-card">
+        {% for equipment in equipments %}
 
-      <!-- IMAGE -->
-      <div class="equipment-image">
-        <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}">
-      </div>
+        <div class="equipment-card">
 
-      <!-- INFO -->
-      <div class="equipment-info">
-        <h3>{{ equipment.name }}</h3>
-        <p class="price">${{ equipment.price_per_day }} / day</p>
-      </div>
+            <!-- IMAGE -->
+            <div class="equipment-image">
 
-      <!-- ACTION -->
-      <div class="equipment-actions">
-        <!-- FORM (DJANGO POST) -->
-        <form method="POST" action="{% url 'add_to_cart' equipment.id %}">
-          {% csrf_token %}
-          <button type="submit" class="cart-btn">
-            Add to Cart
-          </button>
-        </form>
-      </div>
+                {% if equipment.image %}
+                    <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}">
+                {% else %}
+                    <img src="{% static 'images/no-image.png' %}" alt="No image">
+                {% endif %}
+
+            </div>
+
+            <!-- INFO -->
+            <div class="equipment-info">
+
+                <h3>{{ equipment.name }}</h3>
+
+                <p class="category">
+                    {{ equipment.category }}
+                </p>
+
+                <p class="description">
+                    {{ equipment.description|truncatechars:80 }}
+                </p>
+
+                <div class="price">
+                    ${{ equipment.price_per_day }} / day
+                </div>
+
+                {% if equipment.available %}
+                    <span class="available">Available</span>
+                {% else %}
+                    <span class="unavailable">Not Available</span>
+                {% endif %}
+
+            </div>
+
+            <!-- ACTION -->
+            <div class="equipment-actions">
+
+                {% if equipment.available %}
+                  <form method="POST" action="{% url 'add_to_cart' equipment.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="cart-btn">
+                                Add To Cart
+                            </button>
+                        </form>
+
+                    {% if equipment.in_cart %}
+
+                        <form method="POST" action="{% url 'remove_from_cart' equipment.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="remove-btn">
+                                Remove From Cart
+                            </button>
+                        </form>
+
+
+                        
+
+                    {% endif %}
+
+                {% else %}
+
+                    <button class="cart-btn" disabled>
+                        Not Available
+                    </button>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+            <h3>No Equipment Found</h3>
+
+        {% endfor %}
 
     </div>
-    {% endfor %}
-
-  </div>
 
 </section>
 
-<!-- CART PREVIEW -->
+<!-- CART -->
+
 <div class="cart-panel">
-  <h3>🛒 Cart</h3>
 
-  {% for item in cart %}
-  <div class="cart-item">
-    <div>
-      {{ item.name }} <br>
-      ${{ item.price }} × {{ item.qty }}
-    </div>
+    <h3>🛒 Cart</h3>
 
-    <div class="qty-controls">
-      <a href="{% url 'decrease_qty' item.id %}">-</a>
-      <span>{{ item.qty }}</span>
-      <a href="{% url 'increase_qty' item.id %}">+</a>
-    </div>
-  </div>
-  {% endfor %}
+    {% if cart %}
 
-  <p>Total: ${{ total_cost }} / day</p>
+        {% for item in cart %}
 
-  <a href="{% url 'packages' %}" class="package-btn">
-    Add to your package
-  </a>
+        <div class="cart-item">
+
+            <strong>{{ item.name }}</strong>
+
+            <br>
+
+            ${{ item.price }} × {{ item.qty }}
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>Your cart is empty.</p>
+
+    {% endif %}
+
+    <p class="total">
+        Total: ${{ total_cost }}/day
+    </p>
+
+   <form method="POST" action="{% url 'create_package' %}">
+
+{% csrf_token %}
+
+<button class="package-btn">
+
+Go To Package
+
+</button>
+
+</form>
+
 </div>
-<script src="{% static 'js/equipment.js' %}"></script>
+
+
 {% endblock %}
-
-
-<!--
-========================================
- BACKEND REQUIREMENTS FOR EQUIPMENT PAGE
-========================================
-
-Context variables required:
-
-1. equipments (QuerySet / List)
-   Each equipment object must contain:
-   - id                (unique identifier)
-   - name              (string)
-   - image             (ImageField / URL)
-   - price_per_day     (decimal/float)
-
-   Example:
-   equipments = [
-     {
-       id: 1,
-       name: "Camera",
-       image: "equipment/camera.jpg",
-       price_per_day: 25
-     }
-   ]
-
-
-2. cart (List of selected items)
-   Each item must contain:
-   - id
-   - name
-   - price
-   - qty
-
-   Example:
-   cart = [
-     {
-       id: 1,
-       name: "Camera",
-       price: 25,
-       qty: 2
-     }
-   ]
-
-
-3. total_cost (Number)
-   - Total cost of all equipment (per day OR calculated as needed)
-
-
-========================================
- REQUIRED URL ROUTES
-========================================
-
-These URLs must exist:
-
-1. add_to_cart (POST)
-   - URL name: 'add_to_cart'
-   - Argument: equipment.id
-   - Function: Adds item to cart
-
-2. increase_qty
-   - URL name: 'increase_qty'
-   - Argument: item.id
-   - Function: Increase quantity
-
-3. decrease_qty
-   - URL name: 'decrease_qty'
-   - Argument: item.id
-   - Function: Decrease quantity
-   - If qty == 0 → remove item
-
-3. package
-   - URL name: 'package'
-   - Redirect to package summary page
-
-
-========================================
- NOTES
-========================================
-
-- Cart should be managed in:
-  → Django session OR database
-
-- total_cost should be calculated in backend
-
-- Image should be accessible via:
-  {{ equipment.image.url }}
-
-- All pricing logic should be handled backend-side
-
-========================================
--->

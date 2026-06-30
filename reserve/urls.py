@@ -40,8 +40,51 @@ urlpatterns = [
     path('packages/',                 views.packages,         name='packages'),
     path('about_us/',                 views.about_us,         name='about_us'),
     path('contact_us/',               views.contact_us,       name='contact_us'),
-    path('equipment/',                views.equipment,        name='equipment'),
+
+    path(
+        'equipment/',
+        views.equipment,
+        name='equipment'
+    ),
+
+
+    # ADD TO CART
+    path(
+        'equipment/add/<int:id>/',
+        views.add_to_cart,
+        name='add_to_cart'
+    ),
+
+
+    # REMOVE FROM CART
+    path(
+        'equipment/remove/<int:id>/',
+        views.remove_from_cart,
+        name='remove_from_cart'
+    ),
+
+path(
+    'create-package/',
+    views.create_package,
+    name='create_package'
+),
+
     path('payment/',                  views.payment,          name='payment'),
+path(
+    "payment-success/",
+    views.payment_success,
+    name="payment_success"
+),
+
+path(
+    "booking-success/<int:booking_id>/",
+    views.booking_success,
+    name="booking_success"
+),
+
+
+
+   
 
     # Map / Trip
     path('maps/',                     views.maps,             name='maps'),
