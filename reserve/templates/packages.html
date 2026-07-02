@@ -9,86 +9,37 @@
 
 <h1>Your Trip Package</h1>
 
-<!-- =========================
-     🔥 RECOMMENDED PACKAGES
-========================= -->
-<div class="section">
-
-    <h3>🔥 Our Top Packages</h3>
-
-    <div class="recommend-grid">
-
-        {% for pkg in recommended_packages %}
-
-        <div class="recommend-card">
-
-            <h4>{{ pkg.name }}</h4>
-
-            <p>{{ pkg.description }}</p>
-
-            <span class="price">
-                ${{ pkg.total_price }}
-            </span>
-
-        </div>
-
-        {% empty %}
-
-        <p>No recommended packages available.</p>
-
-        {% endfor %}
-
-    </div>
-
-</div>
-
-
-
-<!-- =========================
-     🧾 USER PACKAGE
-========================= -->
-
 <div class="section">
 
 <h3>🧾 Your Selected Package</h3>
 
-
-
-<!-- HOTEL -->
+<!-- =========================
+     🏨 HOTEL
+========================= -->
 
 <h4>🏨 Hotel</h4>
 
-{% if booking %}
+{% if hotel %}
 
 <div class="item">
 
-    <span>
+    <span style="display:flex; align-items:center; gap:10px;">
 
-        {{ booking.hotel.name }}
+        <img src="{{ hotel.image.url }}"
+             alt="{{ hotel.name }}"
+             style="width:80px;height:80px;object-fit:cover;border-radius:10px;">
 
-        <br>
+        <div>
+            <strong>{{ hotel.name }}</strong>
+            <br>
 
-        Room:
-        {{ booking.room.room_number }}
-
-        ({{ booking.room.room_type }})
+            Room: {{ room.room_number }} ({{ room.room_type }})
+        </div>
 
     </span>
 
     <span>
-
-        ${{ booking.room.price }}
-
-        ×
-
-        {{ booking.num_rooms }}
-
-        ×
-
-        {{ days }}
-
-        days
-
+        ${{ room.price }} × {{ nr }} × {{ days }} days
     </span>
 
 </div>
@@ -100,37 +51,26 @@
 {% endif %}
 
 
-
-<!-- EQUIPMENT -->
+<!-- =========================
+     📸 EQUIPMENT
+========================= -->
 
 <h4>📸 Equipment</h4>
 
-{% if equipment_items %}
+{% if cart %}
 
-    {% for item in equipment_items %}
+    {% for item in cart %}
 
-    <div class="item">
+    <div class="item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
 
-        <span>
-
-            {{ item.equipment.name }}
-
+        <!-- LEFT SIDE -->
+        <span style="font-weight:500;">
+            {{ item.name }}
         </span>
 
+        <!-- RIGHT SIDE -->
         <span>
-
-            ${{ item.equipment.price_per_day }}
-
-            ×
-
-            {{ item.quantity }}
-
-            ×
-
-            {{ days }}
-
-            days
-
+            ${{item.price}} × {{ item.qty }} × {{ days }} days
         </span>
 
     </div>
@@ -142,20 +82,25 @@
 <p>No equipment selected.</p>
 
 {% endif %}
-
-
-
-<!-- VEHICLE -->
+<!-- =========================
+     🚗 VEHICLE
+========================= -->
 
 <h4>🚗 Vehicle</h4>
 
 <div class="item">
 
-    <span>
+    <span style="display:flex; align-items:center; gap:10px;">
 
         {% if vehicle %}
 
-            {{ vehicle.name }}
+            <img src="{{ vehicle.image.url }}"
+                 alt="{{ vehicle.name }}"
+                 style="width:60px;height:60px;object-fit:cover;border-radius:10px;">
+
+            <div>
+                {{ vehicle.name }}
+            </div>
 
         {% else %}
 
@@ -166,59 +111,46 @@
     </span>
 
     <span>
-
         ${{ vehicle_cost }}
-
     </span>
 
 </div>
 
 
-
-<!-- DAYS -->
+<!-- =========================
+     📅 DAYS
+========================= -->
 
 <h4>📅 Duration</h4>
 
 <div class="item">
-
     <span>Total Days</span>
-
     <span>{{ days }}</span>
-
 </div>
 
 </div>
-
 
 
 <!-- =========================
-     TOTAL
+     💰 TOTAL
 ========================= -->
 
 <div class="total-box">
 
 <h2>
-
-Total Cost:
-
-${{ total_cost }}
-
+Total Cost: ${{ total_cost }}
 </h2>
 
 </div>
 
 
-
 <!-- =========================
-     PAYMENT
+     💳 PAYMENT
 ========================= -->
 
 <a href="{% url 'payment' %}" class="pay-btn">
-
 Finalize & Proceed to Payment
-
 </a>
-
 
 </div>
 

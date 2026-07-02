@@ -101,6 +101,12 @@ class HotelBooking(models.Model):
         null=True,
         blank=True
     )
+    vehicle = models.ForeignKey(
+        'Vehicle',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
 
     check_in = models.DateField()
 

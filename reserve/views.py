@@ -409,9 +409,9 @@ def create_package(request):
         return redirect("index")
 
 
-    if not cart:
+    # if not cart:
 
-        return redirect("equipment")
+    #     return redirect("equipment")
 
 
     return redirect("packages")
@@ -475,6 +475,9 @@ def packages(request):
         id=hotel_data["room_id"]
     )
 
+    vehicle = Vehicle.objects.get(
+        id=1
+    )  # Assuming you have a Vehicle model and want to get the first vehicle
 
     cart = request.session.get(
         "cart",
@@ -517,8 +520,10 @@ def packages(request):
         rate = 50
 
 
-
-    vehicle_cost = Decimal(str(distance * rate))
+    if vehicle:
+        vehicle_cost =int(Decimal(str(distance * rate)))
+    else:
+        vehicle_cost = 0
 
 
 
@@ -555,11 +560,15 @@ def packages(request):
 
             "room": room,
 
+            "nr": hotel_data["num_rooms"],
+
             "cart": cart,
 
             "days": trip.days,
 
             "distance": distance,
+
+            "vehicle": vehicle,
 
             "vehicle_rate": rate,
 

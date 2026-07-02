@@ -25,29 +25,34 @@
       </form>
     </div>
 
-  <t class="d-flex flex-row">
-     {% if user.is_authenticated %}
-      <form action="" method="get">
-        {% csrf_token %}
-        {{user.username}}
-        </form>
-      
-      <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Logout</button>
-      
-      </form>
+<div class="d-flex align-items-center justify-content-end" style="gap: 12px;">
 
-       {% else %}
-       <a href="{% url "register" %}" class="btn btn-warning" style="color:rgb(150, 162, 172); text-decoration:none;">Register</a>
-        </t>
-       <a href="{% url "login" %}" class="btn btn-success"style="color:rgb(150, 162, 172); text-decoration:none">Login</a> 
-      
-      
+  {% if user.is_authenticated %}
 
-      
-      {% endif %}
-  </div>
+    <span style="color:#f8fafc; font-weight:500; margin-top:10px">
+      {{ user.username }}
+    </span>
+
+    <form action="{% url 'logout' %}" method="post" style="margin:0;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-sm">
+        Logout
+      </button>
+    </form>
+
+  {% else %}
+
+    <a href="{% url 'register' %}" class="btn btn-warning btn-sm">
+      Register
+    </a>
+
+    <a href="{% url 'login' %}" class="btn btn-success btn-sm">
+      Login
+    </a>
+
+  {% endif %}
+
+</div>
 
     
 
