@@ -4,43 +4,124 @@
 {% block content %}
 
 <section class="comments-page">
-<hr style="border: 1px solid #f8fafc;; margin: 20px 0;">
+
+    <hr style="border: 1px solid #f8fafc; margin: 20px 0;">
+
     <h2 class="comments-title">Traveler Reviews</h2>
 
-    <!-- COMMENT INPUT -->
+    <!-- ⭐ SUMMARY SECTION -->
+    <div class="rating-summary">
+
+        <div class="average-rating">
+            <span style="font-size: 2rem;">{{ average_rating }}</span>
+            <small>/ 5 Average Rating</small>
+        </div>
+
+        <div class="top-review">
+            <h4>Top Review</h4>
+
+            {% if top_review %}
+                <p>{{ top_review.comment }}</p>
+                <span>— {{ top_review.user.username }} (⭐ {{ top_review.rating }})</span>
+            {% else %}
+                <p>No reviews yet.</p>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- ⭐ COMMENT FORM -->
     <div class="comment-input-box">
 
-        <form id="commentForm">
+        <form method="POST" action="{% url 'comments' %}">
+            {% csrf_token %}
 
-            <input type="text" id="commentName" placeholder="Your name" required>
+            <textarea name="comment" placeholder="Share your travel experience..." required></textarea>
 
-            <textarea id="commentText" placeholder="Share your travel experience..." required></textarea>
+            <input type="hidden" name="rating" id="ratingInput">
 
-            <div class="comment-bottom">
-
-                <!-- Rating -->
-                <div class="star-rating" id="starRating">
-                    <span data-value="1">★</span>
-                    <span data-value="2">★</span>
-                    <span data-value="3">★</span>
-                    <span data-value="4">★</span>
-                    <span data-value="5">★</span>
-                </div>
-
-                <button type="submit">Post Comment</button>
-
+            <!-- ⭐ STAR RATING -->
+            <div class="star-rating" id="starRating">
+                <span data-value="1">★</span>
+                <span data-value="2">★</span>
+                <span data-value="3">★</span>
+                <span data-value="4">★</span>
+                <span data-value="5">★</span>
             </div>
+
+            <button type="submit">Post Review</button>
 
         </form>
 
     </div>
 
-    <!-- COMMENTS LIST -->
-    <div id="commentsList" class="comments-list"></div>
+    <!-- 🧾 COMMENTS LIST -->
+    <div class="comments-list">
+
+        {% for r in reviews %}
+
+            <div class="comment-card">
+
+                <div class="comment-header">
+                    <strong>{{ r.user.username }}</strong>
+                    <span>⭐ {{ r.rating }}/5</span>
+                </div>
+
+                <p>{{ r.comment }}</p>
+
+                <small>{{ r.created_at }}</small>
+
+            </div>
+
+        {% empty %}
+
+            <p>No reviews yet. Be the first to share your experience!</p>
+
+        {% endfor %}
+
+    </div>
 
 </section>
 
-<!-- <link rel="stylesheet" href="{% static 'css/comments.css' %}">
-<script src="{% static 'js/comments.js' %}"></script> -->
+<!-- ⭐ STAR SCRIPT -->
+<script>
+let stars = document.querySelectorAll("#starRating span");
+let ratingInput = document.getElementById("ratingInput");
+
+stars.forEach(star => {
+    star.addEventListener("click", () => {
+
+        let value = star.getAttribute("data-value");
+        ratingInput.value = value;
+
+        stars.forEach(s => s.classList.remove("active"));
+
+        for (let i = 0; i < value; i++) {
+            stars[i].classList.add("active");
+        }
+
+    });
+});
+</script>
+
+<!-- <style>
+.star-rating span {
+    font-size: 25px;
+    cursor: pointer;
+    color: #ccc;
+}
+
+.star-rating span.active {
+    color: gold;
+}
+
+.comment-card {
+    border: 1px solid #eee;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+</style> -->
 
 {% endblock %}

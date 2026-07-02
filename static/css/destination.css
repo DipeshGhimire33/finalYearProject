@@ -27,6 +27,7 @@
     transform: translateY(-50%) scale(0.85);
     transition: all 0.5s ease;
     opacity: 0;
+    text-decoration: none;
     cursor: pointer;
     border-radius: 15px;
     background: white;

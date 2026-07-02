@@ -23,6 +23,8 @@
         <div class="slide" style="background-image: url('{% static "images/destinations/destination2.jpg" %}');"></div>
         <div class="slide" style="background-image: url('{% static "images/destinations/destination3.jpg" %}');"></div>
         <div class="slide" style="background-image: url('{% static "images/destinations/destination4.jpg" %}');"></div>
+        <div class="slide" style="background-image: url('{% static "images/destinations/destination6.jpg" %}');"></div>
+        
     </div>
 
     <div class="hero-content">
@@ -36,23 +38,22 @@
     <h2>Choose Your Destination</h2>
     <div class="destination-carousel" id="popular-carousel">
         <div class="carousel-track">
-            <div class="destination-card" data-link="destinations/">
-                <img src="{% static 'images/destinations/destination1.jpg' %}" alt="Mountain Escape">
-                <h3>Mountain Escape</h3>
-            </div>
-            <div class="destination-card" data-link="destinations/">
-                <img src="{% static 'images/destinations/destination2.jpg' %}" alt="Beach Paradise">
-                <h3>Beach Paradise</h3>
-            </div>
-            <div class="destination-card" data-link="destinations/">
-                <img src="{% static 'images/destinations/destination3.jpg' %}" alt="City Lights">
-                <h3>City Lights</h3>
-            </div>
-            <div class="destination-card" data-link="destinations/">
-                <img src="{% static 'images/destinations/destination4.jpg' %}" alt="Forest Retreat">
-                <h3>Forest Retreat</h3>
-            </div>
-        </div>
+            {% for destination in destinations %}
+<a href="{% url 'destinations' destination.id %}" class="destination-card">
+
+    {% if destination.image %}
+        <img src="{{ destination.image.url }}" alt="{{ destination.name }}">
+    {% else %}
+        <img src="{% static 'images/default-destination.jpg' %}" alt="No Image">
+    {% endif %}
+
+    <h3>{{ destination.name }}</h3>
+
+</a>
+{% empty %}
+<p>No destinations available.</p>
+{% endfor %}
+</div>
 
         <div class="carousel-controls">
             <button class="carousel-btn prev">Prev</button>
@@ -92,29 +93,59 @@
     >
 
         <div class="average-rating">
-            <span id="averageRating">0</span>
-            <small>/ 5 Average Rating</small>
-        </div>
+    <span>{{ average_rating }}</span>
+    <small>/ 5 Average Rating</small>
+</div>
 
-        <div class="top-review">
-            <h4>Top Review</h4>
-            <p id="topReviewText">No reviews yet.</p>
-            <span id="topReviewer"></span>
-        </div>
+<div class="top-review">
+    <h4>Top Review</h4>
 
-    </div>
+    {% if top_review %}
+        <p>{{ top_review.comment }}</p>
+        <span>– {{ top_review.user.username }}</span>
+    {% else %}
+        <p>No reviews yet.</p>
+    {% endif %}
+</div>
 
 </section>
         </div>
+      <div class="feature-card clickable-card" data-link="gallery" id="happysmiles">
 
-        <!-- Happy Smiles Block -->
-        <div class="feature-card clickable-card" data-link="gallery/" id="happysmiles">
-            <h3>Happy Smiles</h3>
-            <img src="https://source.unsplash.com/400x200/?smile,tourist" alt="Happy Smiles">
-            <p>Our customers sharing their joyful travel moments.</p>
-        </div>
+    <h3>Happy Smiles</h3>
+
+    <div class="single-slider">
+
+        {% for exp in latest_experiences %}
+            {% if exp.image %}
+                <img class="slide {% if forloop.first %}active{% endif %}"
+                     src="{{ exp.image.url }}"
+                     alt="smile">
+            {% endif %}
+        {% endfor %}
+
+    </div>
+
+</div>
     </div>
 </section>
 
-<script src="{% static 'js/index.js' %}"></script>
+<script>
+let slides = document.querySelectorAll(".single-slider .slide");
+let index = 0;
+
+function nextSlide() {
+    if (slides.length === 0) return;
+
+    slides.forEach(img => img.classList.remove("active"));
+
+    index = (index + 1) % slides.length;
+
+    slides[index].classList.add("active");
+}
+
+if (slides.length > 0) {
+    setInterval(nextSlide, 3000); // change every 3 sec
+}
+</script>
 {% endblock %}

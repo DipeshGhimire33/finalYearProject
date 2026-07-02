@@ -9,9 +9,10 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from dotenv import load_dotenv
 from decimal import Decimal
+from django.db.models import Avg
 from .forms import CustomerRegistrationForm, HotelRegistrationForm
-from .models import (Booking, Customer, Guide, Hotel, HotelOwner, Room, Trip,
-                     UserProfile,Equipment, BookingEquipment, Vehicle, HotelBooking)
+from .models import *
+from reserve import models
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
@@ -20,8 +21,41 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 # General pages
 # ---------------------------------------------------------------------------
 
+
+
+
+
 def index(request):
-    return render(request, 'index.html')
+
+    # -------------------------
+    # Destinations (homepage)
+    # -------------------------
+    destinations = Destination.objects.all()
+
+    # -------------------------
+    # App Reviews (rating block)
+    # -------------------------
+    reviews = AppReview.objects.select_related('user')
+
+    average_rating = reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+    top_review = reviews.order_by('-rating', '-created_at').first()
+
+    # -------------------------
+    # Happy Smiles (gallery slider)
+    # -------------------------
+    latest_experiences = DestinationExperience.objects.all().order_by('-created_at')[:10]
+
+    # -------------------------
+    # Context
+    # -------------------------
+    context = {
+        "destinations": destinations,
+        "average_rating": round(average_rating, 1),
+        "top_review": top_review,
+        "latest_experiences": latest_experiences,
+    }
+
+    return render(request, "index.html", context)
 
 
 def base(request):
@@ -32,16 +66,69 @@ def dashboard(request):
     return render(request, 'dashboard.html')
 
 
-def destinations(request):
-    return render(request, 'destinations.html')
+def destinations(request,id):
+    destination = get_object_or_404(Destination, id=id)
 
+    context = {
+        "destination": destination,
+        "popular_places": destination.popular_places.all(),
+        "must_visit_places": destination.must_visit_places.all(),
+    }
+
+    return render(request, "destinations.html", context)
 
 def comments(request):
-    return render(request, 'comments.html')
+
+    if request.method == "POST":
+        AppReview.objects.create(
+            user=request.user,
+            rating=int(request.POST.get("rating")),
+            comment=request.POST.get("comment")
+        )
+        return redirect("comments")  # IMPORTANT refresh
+
+    # 🔥 ALWAYS fetch fresh data
+    reviews = AppReview.objects.all().order_by("-created_at")
+
+    average_rating = reviews.aggregate(avg=Avg('rating'))['avg']
+    if average_rating is None:
+        average_rating = 0
+
+    top_review = reviews.order_by("-rating", "-created_at").first()
+
+    return render(request, "comments.html", {
+        "reviews": reviews,
+        "average_rating": round(average_rating, 1),
+        "top_review": top_review
+    })
+
+
+
 
 
 def gallery(request):
-    return render(request, 'gallery.html')
+    if request.method == "POST":
+        destination = Destination.objects.get(id=request.POST.get("destination"))
+
+        DestinationExperience.objects.create(
+            user=request.user,
+            destination=destination,
+            image=request.FILES.get("image"),
+            caption=request.POST.get("caption")
+        )
+
+        return redirect("gallery")
+
+    experiences = DestinationExperience.objects.select_related(
+        "user", "destination"
+    ).order_by("-created_at")
+
+    destinations = Destination.objects.all()
+
+    return render(request, "gallery.html", {
+        "experiences": experiences,
+        "destinations": destinations,
+    })
 
 
 
@@ -49,8 +136,23 @@ def about_us(request):
     return render(request, 'about_us.html')
 
 
+from django.contrib import messages
+
 def contact_us(request):
-    return render(request, 'contact_us.html')
+    if request.method == "POST":
+        ContactMessage.objects.create(
+            name=request.POST.get("name"),
+            email=request.POST.get("email"),
+            subject=request.POST.get("subject"),
+            message=request.POST.get("message"),
+        )
+
+        messages.success(request, "Message sent successfully!")
+        return redirect("contact_us")
+
+    return render(request, "contact_us.html")
+
+
 
 def book_hotel(request, hotel_id):
 
@@ -432,13 +534,13 @@ def packages(request):
 
 
 
-    total_cost = (
+    total_cost = int((
         hotel_cost
         +
         equipment_cost
         +
         vehicle_cost
-    )
+    ))
 
 
 

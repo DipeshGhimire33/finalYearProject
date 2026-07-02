@@ -14,7 +14,31 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.role}"
 
+class Destination(models.Model):
+    name        = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    image       = models.ImageField(upload_to='media/destinations/', null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
+class DestinationPopular(models.Model):
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='popular_places')
+    name        = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    image       = models.ImageField(upload_to='media/destination/popular/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.destination.name}"
+
+class DestinationMustVisit(models.Model):
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='must_visit_places')
+    name        = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    image       = models.ImageField(upload_to='media/destination/must_visit/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.destination.name}"
 class Hotel(models.Model):
     name            = models.CharField(max_length=255)
     location        = models.CharField(max_length=255, blank=True, null=True)
@@ -288,17 +312,42 @@ class Package(models.Model):
 
     def __str__(self):
         return self.name
+    
 
-class Review(models.Model):
-    hotel      = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='reviews')
-    user       = models.ForeignKey(User, on_delete=models.CASCADE)
-    rating     = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
-    comment    = models.TextField(blank=True)
+class AppReview(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class HotelReview(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    hotel = models.ForeignKey('Hotel', on_delete=models.CASCADE)
+    rating = models.IntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class DestinationExperience(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="gallery/")
+    caption = models.TextField()
+    likes = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Review by {self.user.username} for {self.hotel.name}"
+        return f"{self.user.username} - {self.destination.name}"
 
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"
 
 class Customer(models.Model):
     user    = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')

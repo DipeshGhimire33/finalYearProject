@@ -34,7 +34,7 @@ urlpatterns = [
     path('hotel_owner/details/',      views.hotelOwnerdetails,name='hotel_owner_details'),
 
     # Static pages
-    path('destinations/',             views.destinations,     name='destinations'),
+    path('destinations/<int:id>/', views.destinations, name='destinations'),
     path('comments/',                 views.comments,         name='comments'),
     path('gallery/',                  views.gallery,          name='gallery'),
     path('packages/',                 views.packages,         name='packages'),

@@ -140,4 +140,12 @@ LOGIN_REDIRECT_URL = "/reserve/" #/here we enter the url where we want to redire
 LOGOUT_REDIRECT_URL = "/reserve/"   #/here we enter the url where we want to redirect after logout
 
 # Email backend settings for password reset
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# from decouple import config # type: ignore
+# Email backend settings for password reset
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bhijanbot@gmail.com'
+EMAIL_HOST_PASSWORD = 'emzfgatmshoabfxt'
+DEFAULT_FROM_EMAIL = 'bhijanbot@gmail.com'

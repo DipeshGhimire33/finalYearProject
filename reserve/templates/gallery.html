@@ -2,125 +2,121 @@
 {% load static %}
 
 {% block content %}
-<hr style="border: 1px solid #f8fafc;; margin: 20px 0;">
+
+<hr style="border: 1px solid #f8fafc; margin: 20px 0;">
+
 <section class="gallery-page">
 
-<!-- HERO SECTION -->
+    <!-- HERO SECTION -->
+    <section class="hero-section small">
 
-<section class="hero-section small">
+        <div class="hero-slider">
 
-<div class="hero-slider">
+            <div class="slide active"
+                 style="background-image: url({% static 'images/gallery/gallery1.jpg' %});"></div>
 
- <div class="slide active" style="background-image: url('{% static "images/gallery/gallery1.jpg" %}');"></div>
-        <div class="slide" style="background-image: url('{% static "images/gallery/gallery2.jpg" %}');"></div>
-        <div class="slide" style="background-image: url('{% static "images/gallery/gallery3.jpg" %}');"></div>
-        <div class="slide" style="background-image: url('{% static "images/gallery/gallery4.jpg" %}');"></div>
+            <div class="slide"
+                 style="background-image: url({% static 'images/gallery/gallery2.jpg' %});"></div>
 
-</div>
+            <div class="slide"
+                 style="background-image: url({% static 'images/gallery/gallery3.jpg' %});"></div>
 
-<div class="hero-content">
-<h1>Happy Smiles</h1>
-<p>Memories from our travelers</p>
-</div>
+            <div class="slide"
+                 style="background-image: url({% static 'images/gallery/gallery4.jpg' %});"></div>
 
-</section>
+        </div>
 
+        <div class="hero-content">
+            <h1>Happy Smiles</h1>
+            <p>Memories from our travelers</p>
+        </div>
 
-<!-- FILTER -->
-<hr style="border: 1px solid #f8fafc;; margin: 20px 0;">
-<div class="gallery-filter">
+    </section>
 
-<button data-filter="all">All</button>
-<button data-filter="everest">Everest</button>
-<button data-filter="annapurna">Annapurna</button>
-<button data-filter="pokhara">Pokhara</button>
+    <!-- FILTER -->
+    <hr style="border: 1px solid #f8fafc; margin: 20px 0;">
 
-</div>
+    <div class="gallery-filter">
 
+        <button data-filter="all">All</button>
 
-<!-- GALLERY GRID -->
+        {% for destination in destinations %}
+            <button data-filter="{{ destination.name|slugify }}">
+                {{ destination.name }}
+            </button>
+        {% endfor %}
 
-<section class="gallery-grid" id="galleryGrid">
+    </div>
 
-<div class="gallery-card" data-category="everest">
+    <!-- GALLERY GRID -->
+    <section class="gallery-grid" id="galleryGrid">
 
-<img src="{% static 'images/gallery/gallery1.jpg' %}">
+        {% for experience in experiences %}
 
-<div class="card-info">
-<span class="username">Alex</span>
-<p>Everest Base Camp trek!</p>
-<div class="like-btn">❤️ <span>0</span></div>
-</div>
+        <div class="gallery-card"
+             data-category="{{ experience.destination.name|slugify }}">
 
-</div>
+            {% if experience.image %}
+                <img src="{{ experience.image.url }}" alt="gallery">
+            {% endif %}
 
+            <div class="card-info">
 
-<div class="gallery-card" data-category="annapurna">
+                <span class="username">
+                    {{ experience.user.username }}
+                </span>
 
-<img src="{% static 'images/gallery/gallery2.jpg' %}">
+                <p>{{ experience.caption }}</p>
 
-<div class="card-info">
-<span class="username">Maya</span>
-<p>Beautiful Annapurna views</p>
-<div class="like-btn">❤️ <span>0</span></div>
-</div>
+                <div class="like-btn">
+                    ❤️ <span>{{ experience.likes }}</span>
+                </div>
 
-</div>
+            </div>
 
+        </div>
 
-<div class="gallery-card" data-category="pokhara">
+        {% empty %}
+            <p>No experiences uploaded yet.</p>
+        {% endfor %}
 
-<img src="{% static 'images/gallery/gallery3.jpg' %}">
+    </section>
 
-<div class="card-info">
-<span class="username">John</span>
-<p>Sunset at Pokhara lake</p>
-<div class="like-btn">❤️ <span>0</span></div>
-</div>
+    <!-- UPLOAD FORM -->
+    <section class="upload-experience">
 
-</div>
+        <h2>Upload Your Experience</h2>
 
-</section>
+        <form method="POST"
+              enctype="multipart/form-data"
+              action="{% url 'gallery' %}">
 
+            {% csrf_token %}
 
+            <select name="destination" required>
 
-<!-- UPLOAD -->
+                {% for destination in destinations %}
+                    <option value="{{ destination.id }}">
+                        {{ destination.name }}
+                    </option>
+                {% endfor %}
 
-<section class="upload-experience">
+            </select>
 
-<h2>Upload Your Experience</h2>
+            <input type="file"
+                   name="image"
+                   accept="image/*"
+                   required>
 
-<form id="uploadForm">
+            <textarea name="caption"
+                      placeholder="Share your experience..."
+                      required></textarea>
 
-<input type="text" id="username" placeholder="Your Name" required>
+            <button type="submit">Upload Photo</button>
 
-<select id="destination">
-<option value="everest">Everest</option>
-<option value="annapurna">Annapurna</option>
-<option value="pokhara">Pokhara</option>
-</select>
+        </form>
 
-<input type="file" id="imageUpload" accept="image/*" required>
-
-<textarea id="caption" placeholder="Share your experience"></textarea>
-
-<button type="submit">Upload Photo</button>
-
-</form>
-
-</section>
-
-
-
-<!-- LIGHTBOX -->
-
-<div class="lightbox" id="lightbox">
-
-<span class="close-lightbox">&times;</span>
-
-<img id="lightboxImage">
-
-</div>
+    </section>
 
 </section>
 

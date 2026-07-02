@@ -21,31 +21,42 @@
 
         <div class="info-box">
           <h3>Email</h3>
-          <p>support@example.com</p>
+          <p>Devloped_at_Nihareeka@email.com</p>
         </div>
 
         <div class="info-box">
           <h3>Phone</h3>
-          <p>+123 456 7890</p>
+          <p>+977 9812345678</p>
         </div>
 
         <div class="info-box">
           <h3>Address</h3>
-          <p>Your City, Your Country</p>
+          <p>Biratnagar,Nepal</p>
         </div>
       </div>
 
       <div class="contact-form-box">
         <h2>Send a Message</h2>
 
-        <form>
-          <input type="text" placeholder="Your Name" required>
-          <input type="email" placeholder="Your Email" required>
-          <input type="text" placeholder="Subject" required>
-          <textarea rows="6" placeholder="Your Message" required></textarea>
-          <button type="submit">Send Message</button>
-        </form>
+        <form method="POST">
+  {% csrf_token %}
+
+  <input type="text" name="name" placeholder="Your Name" required>
+  <input type="email" name="email" placeholder="Your Email" required>
+  <input type="text" name="subject" placeholder="Subject" required>
+
+  <textarea name="message" rows="6" placeholder="Your Message" required></textarea>
+
+  <button type="submit">Send Message</button>
+</form>
       </div>
+      {% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message|escapejs }}");
+    {% endfor %}
+  </script>
+{% endif %}
     </div>
   </section>
 
