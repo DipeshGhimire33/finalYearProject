@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from dotenv import load_dotenv
 from decimal import Decimal
-from django.db.models import Avg
+from django.db.models import Avg, Count
 from .forms import CustomerRegistrationForm, HotelRegistrationForm
 from .models import *
 from reserve import models
@@ -25,34 +25,35 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 
 
-def index(request):
+from django.db.models import Count, Avg
 
-    # -------------------------
-    # Destinations (homepage)
-    # -------------------------
+def index(request):
     destinations = Destination.objects.all()
 
-    # -------------------------
-    # App Reviews (rating block)
-    # -------------------------
     reviews = AppReview.objects.select_related('user')
-
     average_rating = reviews.aggregate(avg=Avg('rating'))['avg'] or 0
     top_review = reviews.order_by('-rating', '-created_at').first()
 
-    # -------------------------
-    # Happy Smiles (gallery slider)
-    # -------------------------
-    latest_experiences = DestinationExperience.objects.all().order_by('-created_at')[:10]
+    latest_experiences = DestinationExperience.objects.order_by('-created_at')[:10]
 
-    # -------------------------
-    # Context
-    # -------------------------
+    # Top destinations based on completed bookings
+    top_packages = (
+        Booking.objects
+        .values("trip__destination")
+        .annotate(
+            total_bookings=Count("id"),
+            average_cost=Avg("total_price"),
+            average_days=Avg("trip__days"),
+        )
+        .order_by("-total_bookings")[:6]
+    )
+
     context = {
         "destinations": destinations,
         "average_rating": round(average_rating, 1),
         "top_review": top_review,
         "latest_experiences": latest_experiences,
+        "top_packages": top_packages,
     }
 
     return render(request, "index.html", context)
@@ -103,7 +104,14 @@ def comments(request):
     })
 
 
+def best_packages(request):
+    packages = Package.objects.annotate(
+        booking_count=Count("booking")
+    ).order_by("-booking_count")
 
+    return render(request, "best_packages.html", {
+        "packages": packages
+    })
 
 
 def gallery(request):

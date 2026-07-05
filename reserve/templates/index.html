@@ -73,10 +73,36 @@
 <section class="feature-blocks">
     <div class="feature-container">
         <!-- Packages Block -->
-        <div class="feature-card clickable-card" data-link="packages/" id="packages">
-            <h3>Best Packages</h3>
-            <img src="https://source.unsplash.com/400x200/?travel,package" alt="Package">
-            <p>Our most popular travel packages for adventurous tourists.</p>
+        <div class="feature-card clickable-card" onclick="openBnModal()">
+            <section class="top-packages">
+    <h2>🔥 Top Travel Packages</h2>
+
+    <div class="package-grid">
+        {% for package in top_packages %}
+            <div class="package-card">
+                <h3>{{ package.trip__destination }}</h3>
+
+                <p>
+                    <strong>Average Cost:</strong>
+                    ₹{{ package.average_cost|floatformat:0 }}
+                </p>
+
+                <p>
+                    <strong>Average Duration:</strong>
+                    {{ package.average_days|floatformat:0 }} Days
+                </p>
+
+                <p>
+                    <strong>Bookings:</strong>
+                    {{ package.total_bookings }}
+                </p>
+
+            </div>
+        {% empty %}
+            <p>No booking data available yet.</p>
+        {% endfor %}
+    </div>
+</section>
         </div>
 
         <!-- Reviews Block -->

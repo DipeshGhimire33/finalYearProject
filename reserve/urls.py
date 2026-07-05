@@ -37,6 +37,7 @@ urlpatterns = [
     path('destinations/<int:id>/', views.destinations, name='destinations'),
     path('comments/',                 views.comments,         name='comments'),
     path('gallery/',                  views.gallery,          name='gallery'),
+
     path('packages/',                 views.packages,         name='packages'),
     path('about_us/',                 views.about_us,         name='about_us'),
     path('contact_us/',               views.contact_us,       name='contact_us'),
