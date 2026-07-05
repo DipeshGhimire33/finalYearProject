@@ -10,19 +10,14 @@ class GuideForm(forms.ModelForm):
 
 
 class CustomerRegistrationForm(UserCreationForm):
-    email = forms.EmailField(required=True, help_text='Required. Enter a valid email address.')
-    role = forms.ChoiceField(
-        choices=[
-            ('customer', 'Customer'),
-            ('hotel_owner', 'Hotel Owner'),
-        ],
-        widget=forms.Select(attrs={'class': 'form-control'}) 
-        # widget=forms.RadioSelect   # shows as radio buttons, you can use Select too
+    email = forms.EmailField(
+        required=True,
+        help_text="Required. Enter a valid email address."
     )
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')
+        fields = ("username", "email", "password1", "password2")
     
     
 
@@ -58,24 +53,22 @@ class BookingForm(forms.ModelForm):
 #         }
 
 class HotelRegistrationForm(forms.ModelForm):
+    location = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = Hotel
-        location = forms.ChoiceField(choices=[
-            ('Kathmandu', 'Kathmandu'),
-            ('Pokhara', 'Pokhara'),
-            ('Chitwan', 'Chitwan'),
-            ('Lumbini', 'Lumbini'),
-            ('Mustang', 'Mustang'), 
-            ('Annapurna', 'Annapurna'),
-            ('Everest', 'Everest'),
-            # Add more locations as needed 
-            #best use the api for this
-        ])
-        widget=forms.Select(attrs={'class': 'form-control'}) 
-            
-        
-        fields = ['name', 'address', 'description', 'price_per_night', 'available_rooms','image'] 
-
+        fields = [
+            'name',
+            'location',
+            'address',
+            'description',
+            'price_per_night',
+            'available_rooms',
+            'image'
+        ]
 
 
 

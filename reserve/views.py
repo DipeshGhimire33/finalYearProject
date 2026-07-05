@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from dotenv import load_dotenv
 from decimal import Decimal
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Sum
 from .forms import CustomerRegistrationForm, HotelRegistrationForm
 from .models import *
 from reserve import models
@@ -62,9 +62,6 @@ def index(request):
 def base(request):
     return render(request, 'base.html')
 
-
-def dashboard(request):
-    return render(request, 'dashboard.html')
 
 
 def destinations(request,id):
@@ -761,27 +758,250 @@ def maps(request):
 def booknow(request):
     return render(request, 'booknow.html')
 
+# ---------------------------------------------------------------------------
+# Dashboard
+# ---------------------------------------------------------------------------
+@login_required
+def admin_dashboard(request):
+
+
+    total_revenue = Booking.objects.aggregate( total=Sum("total_price"))["total"] or 0
+
+    total_bookings = Booking.objects.count()
+
+    hotel_count = Hotel.objects.count()
+
+    customer_count = Customer.objects.count()
+
+    top_destinations = (
+    Booking.objects
+    .values("trip__destination")
+    .annotate(
+        bookings=Count("id"),
+        avg_price=Avg("total_price")
+    )
+    .order_by("-bookings")[:5]
+    )
+
+    recent_bookings = Booking.objects.select_related(
+    "user",
+    "trip",
+    "hotel"
+    ).order_by("-id")[:10]
+
+    BookingEquipment.objects.values(
+    "equipment__name"
+    ).annotate(
+    total=Count("id")
+    ).order_by("-total")
+
+    Booking.objects.values(
+    "hotel__name"
+    ).annotate(
+    total=Count("id")
+    ).order_by("-total")
+
+    popular_hotels = (
+    Booking.objects
+    .values("hotel__name")
+    .annotate(
+        total=Count("id")
+    )
+    .order_by("-total")[:5]
+)
+    
+    popular_equipment = (
+    BookingEquipment.objects
+    .values("equipment__name")
+    .annotate(
+        total=Count("id")
+    )
+    .order_by("-total")[:5]
+)
+    
+
+    
+    latest_gallery=(DestinationExperience.objects.order_by(
+    "-created_at"
+)[:6])
+    
+    latest_messages=(ContactMessage.objects.order_by(
+    "-id"
+)[:5])
+    
+    latest_reviews = AppReview.objects.select_related("user").order_by("-created_at")[:5]
+    
+
+    context = {
+
+        "total_revenue": total_revenue,
+
+        "total_bookings": total_bookings,
+
+        "hotel_count": hotel_count,
+
+        "customer_count": customer_count,
+
+        "recent_bookings": recent_bookings,
+
+        "top_destinations": top_destinations,
+
+        "popular_hotels": popular_hotels,
+
+        "popular_equipment": popular_equipment,
+
+        "latest_reviews": latest_reviews,
+
+        "messages": latest_messages,
+
+        "gallery": latest_gallery,
+
+    }
+
+    return render(
+        request,
+        "dashboard.html",
+        context
+    )
+
+@login_required
+def hotel_owner_dashboard(request):
+
+    my_hotels = Hotel.objects.filter(owner=request.user)
+
+    bookings = Booking.objects.filter(
+        hotel__in=my_hotels
+    )
+
+    total_revenue = bookings.aggregate(
+        total=Sum("total_price")
+    )["total"] or 0
+
+    total_bookings = bookings.count()
+
+    hotel_count = my_hotels.count()
+
+    customer_count = (
+        bookings.values("user")
+        .distinct()
+        .count()
+    )
+
+    top_destinations = (
+        bookings.values("trip__destination")
+        .annotate(
+            bookings=Count("id"),
+            avg_price=Avg("total_price")
+        )
+        .order_by("-bookings")[:5]
+    )
+
+    recent_bookings = (
+        bookings
+        .select_related(
+            "user",
+            "trip",
+            "hotel"
+        )
+        .order_by("-id")[:10]
+    )
+
+    popular_hotels = (
+        bookings
+        .values("hotel__name")
+        .annotate(
+            total=Count("id")
+        )
+        .order_by("-total")
+    )
+
+    popular_equipment = (
+        BookingEquipment.objects
+        .filter(
+            booking__hotel__in=my_hotels
+        )
+        .values("equipment__name")
+        .annotate(
+            total=Count("id")
+        )
+        .order_by("-total")[:5]
+    )
+
+    latest_reviews = (
+        HotelReview.objects
+        .filter(
+            hotel__in=my_hotels
+        )
+        .select_related(
+            "user",
+            "hotel"
+        )
+        .order_by("-created_at")[:5]
+    )
+
+    context = {
+
+        "total_revenue": total_revenue,
+
+        "total_bookings": total_bookings,
+
+        "hotel_count": hotel_count,
+
+        "customer_count": customer_count,
+
+        "recent_bookings": recent_bookings,
+
+        "top_destinations": top_destinations,
+
+        "popular_hotels": popular_hotels,
+
+        "popular_equipment": popular_equipment,
+
+        "latest_reviews": latest_reviews,
+
+    }
+
+    return render(
+        request,
+        "hotel_owner_dashboard.html",
+        context,
+    )
+
+@login_required
+def dashboard(request):
+    if request.user.is_superuser:
+        return admin_dashboard(request)
+
+    elif request.user.groups.filter(name="HotelOwner").exists():
+        return hotel_owner_dashboard(request)
+
+    return redirect("index")
 
 # ---------------------------------------------------------------------------
 # Auth
 # ---------------------------------------------------------------------------
 
 def register(request):
+
     if request.method == 'POST':
         form = CustomerRegistrationForm(request.POST)
+
         if form.is_valid():
             user = form.save(commit=False)
             user.email = form.cleaned_data['email']
             user.set_password(form.cleaned_data['password1'])
             user.save()
 
-            role = form.cleaned_data['role']
-            UserProfile.objects.create(user=user, role=role)
+            # OPTIONAL: auto-login
             login(request, user)
 
-            return redirect('dashboard' if role == 'hotel_owner' else 'index')
+            messages.success(request, "Account created successfully!")
+
+            return redirect('index')  # everyone starts as customer
+
         else:
             messages.error(request, 'Please fix the errors below.')
+
     else:
         form = CustomerRegistrationForm()
 
@@ -798,12 +1018,25 @@ def HotelList(request):
     return render(request, 'hotels.html', {'hotels': hotels})
 
 
+
+from django.http import HttpResponseForbidden
+
+
 @login_required
 def HotelRegistration(request):
+
+    # only hotel owners allowed
+    if not request.user.groups.filter(name="HotelOwner").exists():
+        return HttpResponseForbidden("Only hotel owners can register hotels")
+
     if request.method == 'POST':
         form = HotelRegistrationForm(request.POST, request.FILES)
+
         if form.is_valid():
-            form.save()
+            hotel = form.save(commit=False)
+            hotel.owner = request.user   # IMPORTANT FIX
+            hotel.save()
+
             messages.success(request, 'Hotel registered successfully!')
             return redirect('dashboard')
         else:
@@ -813,18 +1046,30 @@ def HotelRegistration(request):
 
     return render(request, 'hotel_reg_form.html', {'form': form})
 
-
 def search(request):
     query = request.GET.get('search', '')
-    hotels = Hotel.objects.filter(name__icontains=query) if query else Hotel.objects.all()
-    return render(request, 'search.html', {'query': query, 'hotel': hotels})
 
+    hotels = Hotel.objects.filter(
+        name__icontains=query
+    ) if query else Hotel.objects.all()
+
+    return render(request, 'search.html', {
+        'query': query,
+        'hotel': hotels
+    })
 
 @login_required
 def EditHotel(request, pk):
+
     hotel = get_object_or_404(Hotel, id=pk)
+
+    # only owner of hotel OR admin
+    if not request.user.is_superuser and hotel.owner != request.user:
+        return HttpResponseForbidden("You are not allowed to edit this hotel")
+
     if request.method == 'POST':
         form = HotelRegistrationForm(request.POST, request.FILES, instance=hotel)
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Hotel updated successfully!')
@@ -839,13 +1084,18 @@ def EditHotel(request, pk):
 
 @login_required
 def deleteHotel(request, pk):
+
+    hotel = get_object_or_404(Hotel, id=pk)
+
+    # only owner or admin
+    if not request.user.is_superuser and hotel.owner != request.user:
+        return HttpResponseForbidden("You cannot delete this hotel")
+
     if request.method == 'POST':
-        # FIX: Hotel has no user field — removed user=request.user filter
-        hotel = get_object_or_404(Hotel, id=pk)
         hotel.delete()
         messages.success(request, 'Hotel deleted successfully!')
-    return redirect('hotels')
 
+    return redirect('hotels')
 
 # ---------------------------------------------------------------------------
 # Guide

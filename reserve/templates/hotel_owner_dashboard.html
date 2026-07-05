@@ -554,31 +554,39 @@
           color: var(--primary);
         }
       </style>
-   <div class="export-wrapper">
   <div class="app-container">
 
-    <!-- Sidebar stays unchanged -->
+    <!-- SIDEBAR -->
     <aside class="sidebar">
-      <!-- ... your sidebar unchanged ... -->
+      <div class="logo-area">
+        <div class="logo-icon">🏨</div>
+        <div class="logo-text">Hotel Owner</div>
+      </div>
+
+      <div class="nav-menu">
+        <div class="nav-item active">Dashboard</div>
+        <div class="nav-item">My Hotels</div>
+        <div class="nav-item">Bookings</div>
+        <div class="nav-item">Reviews</div>
+        <div class="nav-item">Equipment Stats</div>
+      </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- MAIN -->
     <main class="main-content">
 
-      <!-- Header -->
+      <!-- HEADER -->
       <header class="top-header">
         <div class="search-container">
           <input type="text" class="search-input"
-                 placeholder="Search tours, bookings, or travelers..." />
+                 placeholder="Search bookings or hotels..." />
         </div>
 
         <div class="header-actions">
           <div class="user-profile">
-            <img src="https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F25-35%2FEuropean%2F4"
-                 class="user-avatar" />
             <div class="user-info">
-              <span class="user-name">Admin</span>
-              <span class="user-role">Dashboard</span>
+              <span class="user-name">{{ request.user.username }}</span>
+              <span class="user-role">Hotel Owner</span>
             </div>
           </div>
         </div>
@@ -586,27 +594,22 @@
 
       <div class="dashboard-scroll">
 
-        <!-- PAGE HEADER -->
+        <!-- PAGE TITLE -->
         <div class="page-header">
-          <h1 class="page-title">Dashboard Overview</h1>
+          <h1 class="page-title">Hotel Owner Dashboard</h1>
         </div>
 
-        <!-- ================= STATS ================= -->
+        <!-- STATS -->
         <div class="stats-grid">
 
           <div class="stat-card">
-            <span class="stat-label">Total Revenue</span>
-            <div class="stat-value">${{ total_revenue }}</div>
-          </div>
-
-          <div class="stat-card">
-            <span class="stat-label">New Bookings</span>
-            <div class="stat-value">{{ total_bookings }}</div>
-          </div>
-
-          <div class="stat-card">
-            <span class="stat-label">Hotels</span>
+            <span class="stat-label">My Hotels</span>
             <div class="stat-value">{{ hotel_count }}</div>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">Total Bookings</span>
+            <div class="stat-value">{{ total_bookings }}</div>
           </div>
 
           <div class="stat-card">
@@ -614,13 +617,19 @@
             <div class="stat-value">{{ customer_count }}</div>
           </div>
 
+          <div class="stat-card">
+            <span class="stat-label">Revenue</span>
+            <div class="stat-value">Rs {{ total_revenue }}</div>
+          </div>
+
         </div>
 
-        <!-- ================= MAIN SPLIT ================= -->
+        <!-- MAIN GRID -->
         <div class="content-split">
 
           <!-- RECENT BOOKINGS -->
           <div class="card-section">
+
             <div class="card-header">
               <div class="card-title">Recent Bookings</div>
             </div>
@@ -628,73 +637,59 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Traveler</th>
-                  <th>Tour</th>
-                  <th>Date</th>
+                  <th>User</th>
+                  <th>Hotel</th>
+                  <th>Check-in</th>
                   <th>Status</th>
                 </tr>
               </thead>
 
               <tbody>
-                {% for booking in recent_bookings %}
+                {% for b in recent_bookings %}
                 <tr>
                   <td>
-                    <div class="user-cell">
-                      <div class="cell-text">
-                        <span class="cell-name">
-                          {{ booking.user.username }}
-                        </span>
-                        <span class="cell-sub">
-                          ID: #{{ booking.id }}
-                        </span>
-                      </div>
+                    <div class="cell-text">
+                      <span class="cell-name">{{ b.user.username }}</span>
+                      <span class="cell-sub">Booking #{{ b.id }}</span>
                     </div>
                   </td>
 
+                  <td>{{ b.hotel.name }}</td>
+
+                  <td>{{ b.check_in }}</td>
+
                   <td>
-                    <span class="tour-name">
-                      {{ booking.trip.name }}
+                    <span class="status-badge status-confirmed">
+                      {{ b.payment_status }}
                     </span>
-                  </td>
-
-                  <td>
-                    {{ booking.created_at|date:"M d, Y" }}
-                  </td>
-
-                  <td>
-                    {% if booking.status == "confirmed" %}
-                      <span class="status-badge status-confirmed">Confirmed</span>
-                    {% else %}
-                      <span class="status-badge status-pending">Pending</span>
-                    {% endif %}
                   </td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
+
           </div>
 
-          <!-- POPULAR DESTINATIONS -->
+          <!-- TOP DESTINATIONS -->
           <div class="card-section">
+
             <div class="card-header">
               <div class="card-title">Top Destinations</div>
             </div>
 
             <div class="destinations-list">
 
-              {% for dest in top_destinations %}
+              {% for d in top_destinations %}
               <div class="destination-item">
-
                 <div class="destination-info">
                   <div class="dest-name">
-                    {{ dest.trip__destination }}
+                    {{ d.trip__destination }}
                   </div>
 
                   <div class="dest-stat">
-                    {{ dest.bookings }} bookings • Avg ${{ dest.avg_price|floatformat:0 }}
+                    {{ d.bookings }} bookings • Avg Rs {{ d.avg_price|floatformat:0 }}
                   </div>
                 </div>
-
               </div>
               {% endfor %}
 
@@ -703,128 +698,71 @@
 
         </div>
 
-        <!-- ================= SECOND ROW ================= -->
+        <!-- SECOND ROW -->
         <div class="content-split">
 
-          <!-- HOTELS -->
+          <!-- POPULAR HOTELS -->
           <div class="card-section">
+
             <div class="card-header">
-              <div class="card-title">Popular Hotels</div>
+              <div class="card-title">My Hotel Performance</div>
             </div>
 
             <div class="destinations-list">
-              {% for hotel in popular_hotels %}
+
+              {% for h in popular_hotels %}
               <div class="destination-item">
                 <div class="destination-info">
-                  <div class="dest-name">{{ hotel.hotel__name }}</div>
-                  <div class="dest-stat">{{ hotel.total }} bookings</div>
+                  <div class="dest-name">{{ h.hotel__name }}</div>
+                  <div class="dest-stat">{{ h.total }} bookings</div>
                 </div>
               </div>
               {% endfor %}
+
             </div>
           </div>
 
           <!-- EQUIPMENT -->
           <div class="card-section">
+
             <div class="card-header">
               <div class="card-title">Popular Equipment</div>
             </div>
 
             <div class="destinations-list">
-              {% for eq in popular_equipment %}
+
+              {% for e in popular_equipment %}
               <div class="destination-item">
                 <div class="destination-info">
-                  <div class="dest-name">{{ eq.equipment__name }}</div>
-                  <div class="dest-stat">{{ eq.total }} bookings</div>
+                  <div class="dest-name">{{ e.equipment__name }}</div>
+                  <div class="dest-stat">{{ e.total }} bookings</div>
                 </div>
               </div>
               {% endfor %}
+
             </div>
           </div>
 
         </div>
 
-        <!-- ================= THIRD ROW ================= -->
-        <div class="content-split">
-
-          <!-- VEHICLES -->
-          <div class="card-section">
-            <div class="card-header">
-              <div class="card-title">Popular Vehicles</div>
-            </div>
-
-            <div class="destinations-list">
-              {% for v in popular_vehicle %}
-              <div class="destination-item">
-                <div class="destination-info">
-                  <div class="dest-name">{{ v.vehicle__name }}</div>
-                  <div class="dest-stat">{{ v.total }} bookings</div>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-
-          <!-- REVIEWS -->
-          <div class="card-section">
-            <div class="card-header">
-              <div class="card-title">Latest Reviews</div>
-            </div>
-
-            <div class="destinations-list">
-              {% for review in latest_reviews %}
-              <div class="destination-item">
-                <div class="destination-info">
-                  <div class="dest-name">
-                    {{ review.user.username }}
-                  </div>
-                  <div class="dest-stat">
-                    {{ review.comment|truncatechars:60 }}
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-
-        </div>
-
-        <!-- ================= MESSAGES ================= -->
+        <!-- REVIEWS -->
         <div class="card-section">
+
           <div class="card-header">
-            <div class="card-title">Latest Messages</div>
+            <div class="card-title">Latest Reviews</div>
           </div>
 
           <div class="destinations-list">
-            {% for msg in messages %}
+
+            {% for r in latest_reviews %}
             <div class="destination-item">
               <div class="destination-info">
-                <div class="dest-name">{{ msg.name }}</div>
-                <div class="dest-stat">
-                  {{ msg.message|truncatechars:80 }}
-                </div>
+                <div class="dest-name">{{ r.user.username }}</div>
+                <div class="dest-stat">{{ r.comment|truncatechars:80 }}</div>
               </div>
             </div>
             {% endfor %}
-          </div>
-        </div>
 
-        <!-- ================= GALLERY ================= -->
-        <div class="card-section">
-          <div class="card-header">
-            <div class="card-title">Latest Gallery</div>
-          </div>
-
-          <div class="destinations-list">
-            {% for g in gallery %}
-            <div class="destination-item">
-              <img src="{{ g.image.url }}" class="destination-thumb" />
-              <div class="destination-info">
-                <div class="dest-name">{{ g.title }}</div>
-                <div class="dest-stat">{{ g.created_at|date:"M d, Y" }}</div>
-              </div>
-            </div>
-            {% endfor %}
           </div>
         </div>
 
@@ -832,7 +770,7 @@
     </main>
   </div>
 </div>
-  <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+<script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
   <style>
     :root {
       --background: #f6fbff;

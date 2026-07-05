@@ -149,3 +149,5 @@ LOGOUT_REDIRECT_URL = "/reserve/"   #/here we enter the url where we want to red
 # EMAIL_HOST_USER = 'bhijanbot@gmail.com'
 # EMAIL_HOST_PASSWORD = 'emzfgatmshoabfxt'
 # DEFAULT_FROM_EMAIL = 'bhijanbot@gmail.com'
+
+
