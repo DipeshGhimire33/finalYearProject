@@ -57,7 +57,6 @@ class HotelRegistrationForm(forms.ModelForm):
         max_length=100,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-
     class Meta:
         model = Hotel
         fields = [
@@ -69,7 +68,7 @@ class HotelRegistrationForm(forms.ModelForm):
             'available_rooms',
             'image'
         ]
-
+  
 
 
 
