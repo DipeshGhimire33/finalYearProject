@@ -14,6 +14,11 @@ urlpatterns = [
     # Hotels
     path('hotels/',                   views.HotelList,        name='hotels'),
     path('hotel/register/',           views.HotelRegistration,name='hotel_registration'),
+    path(
+        'hotel/<int:hotel_id>/rate/',
+        views.rate_hotel,
+        name='rate_hotel'
+    ),
     path('hotel/edit/<int:pk>/',      views.EditHotel,        name='edit_hotel'),
     path('hotel/delete/<int:pk>/',    views.deleteHotel,      name='delete_hotel'),
     path('hotel/book/<int:hotel_id>/',views.book_room,        name='book_room'),
@@ -28,7 +33,7 @@ urlpatterns = [
     path('booking/success/<int:booking_id>/',views.booking_success, name='booking_success'),
 
     # Search
-    path('search/',                   views.search,           name='search'),
+    path('search/', views.search_hotels, name='search_hotels'),
 
     # Profiles
     path('customer/details/',         views.customerDetails,  name='customer_details'),

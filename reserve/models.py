@@ -330,7 +330,12 @@ class Package(models.Model):
 
 class AppReview(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    rating = models.IntegerField()
+    rating = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(5),
+        ]
+    )
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -338,7 +343,12 @@ class AppReview(models.Model):
 class HotelReview(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     hotel = models.ForeignKey('Hotel', on_delete=models.CASCADE)
-    rating = models.IntegerField()
+    rating = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(5),
+        ]
+    )
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

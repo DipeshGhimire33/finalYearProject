@@ -9,10 +9,11 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from dotenv import load_dotenv
 from decimal import Decimal
-from django.db.models import Avg, Count, Sum
-from .forms import CustomerRegistrationForm, HotelRegistrationForm
+from django.db.models import Avg, Count, Sum , Q
+from .forms import CustomerRegistrationForm, HotelRegistrationForm, HotelReviewForm
 from .models import *
 from reserve import models
+from django.http import HttpResponseForbidden
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
@@ -752,6 +753,7 @@ def payment_success(request):
         booking_id=booking.id
     )
 
+
 def maps(request):
     return render(request, 'maps.html')
 
@@ -1012,15 +1014,59 @@ def register(request):
 # Hotel
 # ---------------------------------------------------------------------------
 
+
 def HotelList(request):
-    # FIX: Hotel has no 'rating' field — removed invalid order_by
+    hotels = Hotel.objects.annotate(
+        avg_rating=Avg("hotelreview__rating")
+    )
+
+    return render(request, "hotels.html", {
+        "hotels": hotels
+    })
+
+def rate_hotel(request, hotel_id):
+    hotel = get_object_or_404(Hotel, id=hotel_id)
+
+    if request.method == "POST":
+        form = HotelReviewForm(request.POST)
+
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.hotel = hotel
+            review.user = request.user
+            review.save()
+
+            return redirect('hotels')
+
+    else:
+        form = HotelReviewForm()
+
+    return render(request, "rate_hotel.html", {
+        "hotel": hotel,
+        "form": form
+    })
+
+
+def search_hotels(request):
+    query = request.GET.get('query', '').strip()
+
     hotels = Hotel.objects.all()
-    return render(request, 'hotels.html', {'hotels': hotels})
 
+    if query:
+        hotels = hotels.filter(
+            Q(name__icontains=query) |
+            Q(location__icontains=query) |
+            Q(address__icontains=query)
+        )
 
+    hotels = hotels.annotate(
+        avg_rating=Avg("hotelreview__rating")
+    )
 
-from django.http import HttpResponseForbidden
-
+    return render(request, "hotels.html", {
+        "hotels": hotels,
+        "query": query
+    })
 
 @login_required
 def HotelRegistration(request):

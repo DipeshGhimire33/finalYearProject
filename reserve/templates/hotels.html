@@ -50,7 +50,7 @@
     }
 </style>
 
-<div class="hotel-container">
+<div class="hotel-container" style="margin-top:90px">
 
     {% for hotel in hotels %}
     <div class="hotel-card">
@@ -71,10 +71,17 @@
             </p>
 
             <p class="hotel-rating">
-                ⭐ Rating: {{ hotel.review }}
-            </p>
+                ⭐ Rating:
+                {% if hotel.avg_rating != None %}
+             {{ hotel.avg_rating|floatformat:1 }}/5
+                {% else %}
+                 No reviews yet
+                {% endif %}
+</p>
         </div>
-
+        <a href="{% url 'rate_hotel' hotel.id %}" class="btn btn-warning">
+    <i class="fa-solid fa-star"></i> Rate Hotel
+</a>
     </div>
     {% endfor %}
 

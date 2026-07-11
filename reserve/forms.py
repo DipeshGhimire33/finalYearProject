@@ -2,6 +2,7 @@ from django import forms
 from .models import  Guide, Booking,Hotel #review
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import HotelReview
 
 class GuideForm(forms.ModelForm):
     class Meta:
@@ -42,15 +43,6 @@ class BookingForm(forms.ModelForm):
             'guide',  # Add guide selection to the booking form
         ]
 
-# class ReviewForm(forms.ModelForm):
-#     rating = forms.IntegerField(min_value=1, max_value=5)
-
-#     class Meta:
-#         model = Review
-#         fields = ['rating', 'review_text']
-#         widgets = {
-#             'review_text': forms.Textarea(attrs={'rows': 4}),
-#         }
 
 class HotelRegistrationForm(forms.ModelForm):
     location = forms.CharField(
@@ -70,6 +62,23 @@ class HotelRegistrationForm(forms.ModelForm):
         ]
   
 
+
+class HotelReviewForm(forms.ModelForm):
+    class Meta:
+        model = HotelReview
+        fields = ['rating', 'comment']
+
+        widgets = {
+            'rating': forms.NumberInput(attrs={
+                'min': 1,
+                'max': 5,
+                'class': 'form-control'
+            }),
+            'comment': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Write your review...'
+            })
+        }
 
 
 

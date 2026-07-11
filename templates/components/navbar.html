@@ -8,6 +8,7 @@
     <ul class="nav-links">
       <li><a href="/"><i class="fa-solid fa-house"></i> Home</a></li>
       <li><a href="{% url 'about_us' %}"><i class="fa-solid fa-info-circle"></i> About</a></li>
+      <li><a href="{% url 'hotels' %}"><i class="fa-solid fa-hotel"></i> Hotel</a></li>
       <li><a href="{% url 'equipment' %}"><i class="fa-solid fa-suitcase-rolling"></i> Equipment</a></li>
       <li><a href="{% url 'contact_us' %}"><i class="fa-solid fa-envelope"></i> Contact</a></li>
       <li><a href="{% url 'maps' %}"><i class="fa-solid fa-road"></i> Route</a></li>
@@ -16,7 +17,7 @@
     <!-- Search bar -->
     <div class="search-bar">
 
-      <form class="d-flex" role="search" action="{% url 'search' %}" method="get">
+      <form class="d-flex" role="search" action="{% url 'search_hotels' %}" method="get">
         {% csrf_token %}
         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query" style="padding: 6px 10px 6px 30px; border-radius: 20px; border: none; outline: none;">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
@@ -76,6 +77,7 @@
     <li>
         <a href="{% url 'about_us' %}"><i class="fa-solid fa-info-circle"></i><span class="menu-text">About</span></a>
     </li>
+    <li><a href="{% url 'hotels' %}"><i class="fa-solid fa-hotel"></i> Hotel</a></li>
     <li>
         <a href="{% url 'equipment' %}"><i class="fa-solid fa-suitcase-rolling"></i><span class="menu-text">Equipment</span></a>
     </li>
